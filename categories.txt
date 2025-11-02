@@ -1,0 +1,39 @@
+clinics
+dentists
+dermatology
+physiotherapy
+nutrition center
+restaurants
+cafes
+coffee shop
+burger
+shawarma
+gym
+fitness center
+crossfit
+personal trainer
+real estate
+property broker
+compound developer
+barber
+salon
+spa
+nail bar
+beauty center
+pet shop
+vet clinic
+grooming
+car service
+detailing
+car rental
+auto parts
+digital marketing agency
+printing house
+advertising
+coworking
+training center
+nursery
+kindergarten
+jewelry shop
+furniture store
+carpentry workshop
