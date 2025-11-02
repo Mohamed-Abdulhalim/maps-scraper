@@ -5,7 +5,7 @@ from supabase import create_client, Client
 
 
 SUPABASE_URL = os.environ["SUPABASE_URL"]
-SUPABASE_KEY = os.environ["SUPABASE_KEY"]
+SUPABASE_KEY = os.environ["SUPABASE_SERVICE_ROLE"]
 SUPABASE_TABLE = os.getenv("SUPABASE_TABLE", "places")
 INPUT = os.getenv("CLEAN_CSV", "NewResults_clean.csv")
 BATCH = int(os.getenv("UPSERT_BATCH", "500"))
