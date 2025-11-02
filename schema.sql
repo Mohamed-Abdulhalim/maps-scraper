@@ -1,1 +1,25 @@
-
+create table if not exists public.places (
+id bigserial primary key,
+category text,
+query_location text,
+name text,
+category_line text,
+address_line text,
+plus_code text,
+phone text,
+website text,
+profile_url text,
+rating text,
+reviews_count text,
+opening_hours text,
+social_links text,
+photo_urls text,
+timestamp text,
+price_text text,
+price_min_egp text,
+price_max_egp text,
+price_is_plus text,
+phone_e164 text,
+address_clean_source text
+);
+create unique index if not exists places_profile_url_uidx on public.places (lower(profile_url));
