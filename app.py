@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
-LEADS_TABLE = os.environ.get("LEADS_TABLE", "places")
+LEADS_TABLE = os.environ.get("LEADS_TABLE") or os.environ.get("SUPABASE_TABLE") or "places"
 
 sb = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
@@ -61,7 +61,7 @@ def search():
     page = request.args.get("page", default=1, type=int)
     per_page = request.args.get("per_page", default=20, type=int)
 
-    q = sb.table(LEADS_TABLE).select("name,category,query_location,category_line,address_line,phone,phone_e164,website,website_fallback,profile_url,rating,reviews_count,opening_hours,is_open_now,today_time_hint,hours_note,gmaps_primary_category,main_photo_url,photo_urls", count="exact")
+    q = sb.table(LEADS_TABLE).select("*", count="exact")
     if category:
         q = q.eq("category", category)
     if location:
@@ -77,39 +77,16 @@ def search():
     page = max(1, min(page, pages))
 
     items = []
-    for row in res.data or []:
-        photos = []
-        raw = row.get("photo_urls")
-        if isinstance(raw, list):
-            photos = [str(u) for u in raw if str(u).startswith("http")]
-        elif isinstance(raw, str):
-            parts = [p.strip() for p in raw.split(",")]
-            photos = [p for p in parts if p.startswith("http")]
-        rec = {
-            "name": str(row.get("name", "")),
-            "category": str(row.get("category", "")),
-            "query_location": str(row.get("query_location", "")),
-            "category_line": str(row.get("category_line", "")),
-            "address_line": str(row.get("address_line", "")),
-            "phone": str(row.get("phone", "")),
-            "phone_e164": str(row.get("phone_e164", "")),
-            "website": str(row.get("website", "")),
-            "website_fallback": str(row.get("website_fallback", "")),
-            "profile_url": str(row.get("profile_url", "")),
-            "rating": str(row.get("rating", "")),
-            "reviews_count": str(row.get("reviews_count", "")),
-            "opening_hours": str(row.get("opening_hours", "")),
-            "is_open_now": str(row.get("is_open_now", "")),
-            "today_time_hint": str(row.get("today_time_hint", "")),
-            "hours_note": str(row.get("hours_note", "")),
-            "gmaps_primary_category": str(row.get("gmaps_primary_category", "")),
-            "main_photo_url": str(row.get("main_photo_url", "")),
-            "photo_urls": ",".join(photos),
-            "photos": photos,
-        }
-        if not rec.get("main_photo_url") and photos:
-            rec["main_photo_url"] = photos[0]
-        items.append(rec)
+    rows = res.data or []
+    for row in rows:
+        row = {k: ("" if v is None else v) for k, v in row.items()}
+        raw = (row.get("photo_urls") or "").strip()
+        photos = [u.strip() for u in raw.split(",") if u.strip().startswith("http")]
+        if not row.get("main_photo_url") and photos:
+            row["main_photo_url"] = photos[0]
+        row["photos"] = photos
+        items.append(row)
+
 
     return jsonify({"items": items, "page": page, "per_page": per_page, "total": total, "pages": pages})
 
