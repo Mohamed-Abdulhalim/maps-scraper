@@ -16,7 +16,7 @@ app = Flask(__name__, static_folder=None, template_folder="templates")
 if not SUPABASE_URL or not SUPABASE_ANON_KEY:
     raise RuntimeError("Set SUPABASE_URL and SUPABASE_ANON_KEY env vars for read-only UI.")
 
-sb: Client = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
+sb = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 # Columns your UI expects (keep these in sync with your table)
 COLUMNS = [
@@ -48,18 +48,16 @@ def clamp(v, lo, hi):
 def to_str(x):
     return "" if x is None else str(x)
 
-def list_categories():
-    # distinct categories
-    q = sb.table(SUPABASE_TABLE).select("category", distinct=True).not_.is_("category", "null")
-    data = q.execute().data or []
-    cats = sorted({to_str(r.get("category")) for r in data if r.get("category")})
+def list_categories() -> list[str]:
+    # fetch, then dedupe client-side
+    res = sb.table(SUPABASE_TABLE).select("category").execute()
+    cats = sorted({(r.get("category") or "").strip() for r in res.data if r.get("category")})
+    # sensible default if table is empty
     return cats or ["restaurants", "clinics", "gyms"]
 
-def list_locations():
-    # distinct locations
-    q = sb.table(SUPABASE_TABLE).select("query_location", distinct=True).not_.is_("query_location", "null")
-    data = q.execute().data or []
-    locs = sorted({to_str(r.get("query_location")) for r in data if r.get("query_location")})
+def list_locations() -> list[str]:
+    res = sb.table(SUPABASE_TABLE).select("query_location").execute()
+    locs = sorted({(r.get("query_location") or "").strip() for r in res.data if r.get("query_location")})
     return locs or ["Cairo, Egypt"]
 
 def parse_photos(row):
