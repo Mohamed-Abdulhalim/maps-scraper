@@ -84,44 +84,44 @@ def index():
 
 @app.get("/search")
 def search():
-    category = request.args.get("category", type=str)
-    location = request.args.get("location", type=str)
-    page = request.args.get("page", default=1, type=int)
-    per_page = request.args.get("per_page", default=20, type=int)
+    category = request.args.get("category", "", type=str)
+    location = request.args.get("location", "", type=str)
+    page     = max(1, request.args.get("page", default=1, type=int))
+    per_page = max(1, min(100, request.args.get("per_page", default=20, type=int)))
 
-    per_page = clamp(per_page, 1, 100)
-    page = clamp(page, 1, 10_000)
-
-    base = sb.table(SUPABASE_TABLE)
-    # total count
-    q_count = base.select("id", count="exact")
-    if category:
-        q_count = q_count.eq("category", category)
-    if location:
-        q_count = q_count.eq("query_location", location)
-    res_count = q_count.execute()
-    total = int(res_count.count or 0)
-
-    pages = max(1, math.ceil(total / per_page))
-    page = clamp(page, 1, pages)
     start = (page - 1) * per_page
-    end = start + per_page - 1  # Supabase uses inclusive range
+    end   = start + per_page - 1  # Supabase range is inclusive
 
-    q = base.select(",".join(COLUMNS))
+    q = sb.table(SUPABASE_TABLE).select("*", count="exact")
     if category:
         q = q.eq("category", category)
     if location:
         q = q.eq("query_location", location)
 
-    # Optional ordering: higher rating first, then more reviews
-    q = q.order("rating", desc=True).order("reviews_count", desc=True).range(start, end)
-    data = q.execute().data or []
+    # best-effort ordering; won't break if rating column is missing
+    try:
+        q = q.order("rating", desc=True)
+    except Exception:
+        pass
+
+    res = q.range(start, end).execute()
+    rows = res.data or []
+    total = res.count or len(rows)
+    pages = max(1, math.ceil(total / per_page))
 
     items = []
-    for r in data:
-        rec = {k: to_str(r.get(k, "")) for k in COLUMNS}
-        parse_photos(rec)
-        items.append(rec)
+    for row in rows:
+        # normalize Nones -> ""
+        row = {k: ("" if v is None else v) for k, v in row.items()}
+
+        # photo handling: support both comma list in photo_urls and optional main_photo_url
+        raw = (row.get("photo_urls") or "").strip()
+        photos = [u.strip() for u in raw.split(",") if u.strip().startswith("http")]
+        main_photo = row.get("main_photo_url") or (photos[0] if photos else "")
+        row["photos"] = photos
+        row["main_photo_url"] = main_photo  # front-end already falls back
+
+        items.append(row)
 
     return jsonify(
         {
