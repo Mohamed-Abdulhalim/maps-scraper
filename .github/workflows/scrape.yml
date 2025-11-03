@@ -2,14 +2,19 @@ name: Scrape
 
 on:
   schedule:
-    - cron: "0 */12 * * *"  # run every 12 hours
-  workflow_dispatch:        # allow manual trigger
+    - cron: "0 */12 * * *"   # every 12 hours
+  workflow_dispatch:         # manual trigger
 
 jobs:
   run:
     runs-on: ubuntu-latest
     env:
       PYTHONUNBUFFERED: "1"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        LOCATION: ["Cairo, Egypt", "Giza, Egypt", "Alexandria, Egypt"]
 
     steps:
       - name: Checkout repo
@@ -25,30 +30,34 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y wget unzip xvfb
           wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" \
-            | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Run scraper (never fail even if scraper crashes at the end)
+      - name: Run scraper — ${{ matrix.LOCATION }} (never fail on tail crash)
         run: |
-          python maps.py --categories-file categories.txt --location "Cairo, Egypt" --max-places 20 --output TheResultss.csv --headless || true
+          python maps.py \
+            --categories-file categories.txt \
+            --location "${{ matrix.LOCATION }}" \
+            --max-places 20 \
+            --output TheResultss.csv \
+            --headless || true
 
-      - name: Clean CSV
+      - name: Clean CSV — ${{ matrix.LOCATION }}
         run: |
           python csv_cleaner.py --in TheResultss.csv --out Cleaned.csv
 
-      - name: Push to Supabase
+      - name: Push to Supabase — ${{ matrix.LOCATION }}
         run: python supabase_push.py Cleaned.csv
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
 
-      - name: Upload cleaned CSV artifact
+      - name: Upload cleaned CSV artifact — ${{ matrix.LOCATION }}
         uses: actions/upload-artifact@v4
         with:
-          name: cleaned_csv
+          name: cleaned_csv_${{ matrix.LOCATION }}
           path: Cleaned.csv
