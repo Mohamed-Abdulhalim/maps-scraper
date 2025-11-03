@@ -36,8 +36,9 @@ This repository contains an automated scraping pipeline that:
 
 ---
 
-## 📦 Repository Structure
+## 📂 Repository Structure
 
+```
 maps-scraper/
 │
 ├── maps.py             # Google Maps scraper → results.csv
@@ -48,7 +49,7 @@ maps-scraper/
 │   └── scrape.yml      # Scheduled GitHub Action (scrape + clean + push)
 ├── requirements.txt
 └── .env.example        # Environment variables (local only)
-
+```
 
 ## ⚙️ Environment Variables
 
