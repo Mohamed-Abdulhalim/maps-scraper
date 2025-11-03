@@ -5,132 +5,156 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lead Finder</title>
   <style>
-    :root{
-      --bg-1:#3b2ab6; /* purple */
-      --bg-2:#0f1226; /* deep navy */
-      --surface:#0b1022;
-      --muted:#8b94b8;
-      --text:#eaf0ff;
-      --accent:#7c5cff;
-      --glass:rgba(16,20,45,.6);
-      --glass-2:rgba(30,35,70,.6);
-      --border:rgba(255,255,255,.08);
-      --chip:#1e2346;
-      --green:#15b888; --blue:#3aa0ff; --pink:#ff6db1; --indigo:#6d7cff;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; color:var(--text);
-      background: radial-gradient(1200px 600px at 20% -10%, var(--bg-1), transparent) , radial-gradient(1200px 700px at 120% 120%, #2d1d7a, transparent), linear-gradient(180deg, #1b1f3b 0%, var(--bg-2) 100%);
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans";
-    }
-    .app{max-width:1200px;margin:48px auto;padding:0 16px}
-    .window{display:grid;grid-template-columns:240px 1fr;background:var(--glass);backdrop-filter: blur(14px); border:1px solid var(--border); border-radius:16px; overflow:hidden; box-shadow: 0 30px 80px rgba(0,0,0,.35)}
-    .sidebar{background:var(--glass-2); padding:18px 14px; border-right:1px solid var(--border)}
-    .brand{display:flex;align-items:center;gap:10px;margin-bottom:18px}
-    .dot{width:12px;height:12px;border-radius:50%;background:var(--accent)}
-    .brand .title{font-weight:700;letter-spacing:.2px}
-    .nav{display:grid;gap:6px}
-    .nav .item{padding:10px 10px;border-radius:10px;color:var(--muted);cursor:default}
+    :root{--bg1:#3820a6;--bg2:#0f1226;--glass:rgba(16,20,45,.55);--glass2:rgba(25,30,65,.55);--border:rgba(255,255,255,.08);--text:#eaf0ff;--muted:#96a1c9;--accent:#7c5cff;--accent2:#3aa0ff;--chip:#1e2346;--success:#15b888;--hot:#ff355d}
+    *{box-sizing:border-box}html,body{height:100%}
+    body{margin:0;color:var(--text);background:radial-gradient(1200px 600px at 20% -10%,var(--bg1),transparent),radial-gradient(1200px 700px at 120% 120%,#2d1d7a,transparent),linear-gradient(180deg,#1b1f3b 0%,var(--bg2) 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    .app{max-width:1240px;margin:42px auto;padding:0 16px}
+    .window{display:grid;grid-template-columns:84px 1fr;background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
+    .sidebar{background:var(--glass2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 10px;gap:12px}
+    .dot{width:10px;height:10px;border-radius:999px;background:var(--accent);margin:6px 0 8px}
+    .nav{display:flex;flex-direction:column;gap:8px;width:100%}
+    .nav .item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:12px;color:var(--muted);cursor:pointer;user-select:none;position:relative;transition:background .2s ease,color .2s ease}
     .nav .item.active{background:rgba(255,255,255,.06);color:#fff}
+    .nav svg{width:22px;height:22px}
+    /* red accent bar for active/hovered nav item */
+    .nav .item::before{content:"";position:absolute;left:6px;top:50%;transform:translateY(-50%) scaleY(.4);width:4px;height:24px;border-radius:999px;background:linear-gradient(180deg,#ff6a80,var(--hot));box-shadow:0 0 10px rgba(255,53,93,.6);opacity:0;transition:opacity .2s ease, transform .2s ease}
+    .nav .item:hover::before,.nav .item.active::before{opacity:1;transform:translateY(-50%) scaleY(1)}
 
-    .main{display:flex;flex-direction:column;min-height:680px}
-    .header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border)}
-    .header .h1{font-size:22px;font-weight:800}
+    .main{display:flex;flex-direction:column;min-height:720px}
+    .header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--border)}
+    .h1{font-size:22px;font-weight:800}
     .ghost{height:34px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--text);padding:0 12px;cursor:pointer}
 
-    .panel{padding:18px 20px;border-bottom:1px solid var(--border)}
+    .panel{padding:18px 22px;border-bottom:1px solid var(--border)}
+    .panel.hidden{display:none}
+
+    .hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}
+    .hero .copy h2{margin:0 0 6px;font-size:28px}
+    .hero .copy p{margin:0;color:var(--muted)}
+    .cta{height:44px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:12px;padding:0 18px;font-weight:800;cursor:pointer}
+    .hero .art{height:180px;border-radius:14px;overflow:hidden;position:relative;background:#0e1430}
+    .hero .art::after{content:"";position:absolute;inset:0;background:radial-gradient(500px 200px at 10% 100%,rgba(124,92,255,.35),transparent),radial-gradient(400px 240px at 90% 0%,rgba(58,160,255,.35),transparent)}
+
     .form-grid{display:grid;grid-template-columns:2fr 2fr 1fr auto;gap:12px;align-items:end}
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
-    select,input{height:38px;border:1px solid var(--border);border-radius:10px;background:#0b1128;color:var(--text);padding:0 10px;outline:none}
+    select,input{height:40px;border:1px solid var(--border);border-radius:12px;background:#0b1128;color:var(--text);padding:0 12px;outline:none}
     select:focus,input:focus{border-color:#4f46e5}
-    .primary{height:38px;border:0;background:linear-gradient(135deg,var(--accent),#00bcd4);color:#fff;border-radius:10px;padding:0 16px;font-weight:700;cursor:pointer}
+    .primary{height:40px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:12px;padding:0 16px;font-weight:800;cursor:pointer}
 
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .toolbar .chip{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);height:34px;padding:0 10px;border-radius:999px}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    /* Center chip content vertically and horizontally */
+    .chip{display:inline-flex;align-items:center;justify-content:center;height:36px;line-height:1;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#bfc7ff;font-weight:700}
 
-    .content{padding:18px 20px}
+    .content{padding:18px 22px}
     .counts{color:var(--muted);font-size:13px;margin-bottom:10px}
-    .grid-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
-    @media (max-width: 1024px){ .grid-cards{grid-template-columns:1fr 1fr} }
-    @media (max-width: 640px){ .window{grid-template-columns:1fr} .sidebar{display:none} .grid-cards{grid-template-columns:1fr} }
 
-    .card{position:relative;border-radius:14px;overflow:hidden;background:#0e1430;border:1px solid var(--border);
-      transition: transform .24s ease, box-shadow .24s ease, border-color .24s ease}
-    .card:hover{transform: translateY(-2px); box-shadow: 0 16px 48px rgba(0,0,0,.45); border-color: rgba(124,92,255,.35)}
-    .cover{height:160px;background:#141a3b;position:relative;overflow:hidden}
-    .cover img{position:absolute;inset:0; width:100%; height:100%; object-fit:cover; filter:saturate(1.15) contrast(1.05)}
-    .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(135deg, rgba(124,92,255,.45), rgba(58,160,255,.35) 50%, rgba(0,0,0,.35) 100%); pointer-events:none; z-index:1}
-    /* slider */
-    .cover img.slide{opacity:0; transition:opacity .35s ease; z-index:0}
-    .cover img.slide.active{opacity:1}
-    .cover .nav{position:absolute;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.35);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3}
-    .cover .nav:hover{background:rgba(0,0,0,.55)}
-    .cover .nav.prev{left:8px}
-    .cover .nav.next{right:8px}
-    .cover .dots{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:3}
-    .cover .dots .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.35);cursor:pointer}
-    .cover .dots .dot.active{background:#fff}
-    .card-body{padding:14px}
-    .card-title{font-weight:700;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-    .card-title a{color:#fff;text-decoration:none}
-    .card-title a:hover{text-decoration:underline}
-    .chips{display:flex;gap:6px;flex-wrap:wrap}
-    .chip{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--chip);color:#bfc7ff;border:1px solid var(--border)}
+    .grid-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+    .card{position:relative;height:300px;border-radius:16px;overflow:hidden;background:#0e1430;border:1px solid var(--border);transition:transform .24s ease, box-shadow .24s ease, border-color .24s ease}
+    .card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 22px 60px rgba(0,0,0,.5);border-color:rgba(124,92,255,.35)}
+    .cover{position:absolute;inset:0}
+    .cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.1) contrast(1.05) brightness(.9)}
+    .cover::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15) 20%,rgba(0,0,0,.55) 70%,rgba(0,0,0,.85) 100%),linear-gradient(135deg,rgba(124,92,255,.25),rgba(58,160,255,.18) 50%,rgba(0,0,0,.1) 100%)}
+    .slides .slide{opacity:0;transition:opacity .35s ease}
+    .slides .slide.active{opacity:1}
+    .navbtn{position:absolute;top:12px;right:12px;display:flex;gap:6px;z-index:3}
+    .navbtn button{width:28px;height:28px;border-radius:999px;border:1px solid var(--border);background:rgba(0,0,0,.35);color:#fff;cursor:pointer;font-size:0}
+    .navbtn button[data-role="prev"]::before{content:'\2039';font-size:14px;line-height:28px;display:inline-block}
+    .navbtn button[data-role="next"]::before{content:'\203A';font-size:14px;line-height:28px;display:inline-block}
+    .dots{position:absolute;right:14px;bottom:12px;display:flex;gap:6px;z-index:3}
+    .dots .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.45)}
+    .dots .dot.active{background:#fff}
+
+    .card-body{position:absolute;left:0;right:0;bottom:0;padding:14px 14px 12px;z-index:2}
+    .title{font-weight:900;font-size:20px;margin:0 0 6px;line-height:1.15;letter-spacing:.1px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+    .meta{font-size:12px;color:#cbd2ff99;margin-top:6px}
+    .chips{display:flex;gap:8px;flex-wrap:wrap}
     .chip--rating{color:#ffd579;border-color:rgba(255,213,121,.35);background:rgba(255,213,121,.12)}
-    .meta{font-size:12px;color:var(--muted);margin-top:6px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
-    .btn{height:34px;padding:0 14px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#eaf0ff;text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-weight:600;letter-spacing:.1px}
-    .btn:hover{background:rgba(255,255,255,.08)}
+    .chip--rating .star{display:inline-block;font-size:14px;line-height:1;margin-right:6px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
+
+    /* Animated reveal: reserve no height by default, expand on hover */
+    .actions{display:flex;flex-wrap:wrap;gap:8px;overflow:hidden;max-height:0;padding-top:0;margin-top:0;opacity:0;transform:translateY(8px);transition:max-height .32s ease, padding .32s ease, opacity .22s ease, transform .22s ease}
+    /* Use per-card variable --act-h set by JS to make enough room */
+    .card:hover .actions{max-height:var(--act-h,72px);padding-top:8px;opacity:1;transform:translateY(0)}
+    /* Lift chips + address by a variable amount derived from actions height */
+    .chips,.meta{transition:transform .28s ease}
+    .card:hover .chips,.card:hover .meta{transform:translateY(calc(-1 * var(--lift, 10px)))}
+    .btn{height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:#eaf0ff;text-decoration:none;display:inline-flex;align-items:center;font-weight:700}
+    .btn--call{border-color:#1e8b6f;background:rgba(20,145,113,.12)}
+    .btn--wa{border-color:#1e8b6f;background:rgba(20,145,113,.12)}
+    .btn--site{border-color:#3953a7;background:rgba(57,83,167,.12)}
+    .btn--maps{border-color:#5a63d6;background:rgba(90,99,214,.12)}
 
     .pagination{display:flex;gap:8px;justify-content:center;margin-top:16px}
-    .pagebtn{height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#fff}
+    .pagebtn{height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:#fff}
     .pagebtn.active{background:var(--accent);border-color:transparent}
 
     .overlay{position:fixed;inset:0;background:rgba(5,8,20,.7);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:50}
     .overlay.show{display:flex}
-    .spinner{ width:56px; height:56px; border-radius:9999px; border:6px solid rgba(255,255,255,0.15); border-top-color: rgba(255,255,255,0.9); animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .stage{margin-left:14px;font-weight:600}
+    .spinner{width:56px;height:56px;border-radius:9999px;border:6px solid rgba(255,255,255,0.15);border-top-color:rgba(255,255,255,0.9);animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .stage{margin-left:14px;font-weight:700}
 
     .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);display:none}
     .toast .bubble{background:#11172f;color:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
     .toast.show{display:block}
 
-    /* Action button variants + a11y */
-    .btn--call{border-color:#1e8b6f;background:rgba(20,145,113,.12)}
-    .btn--copy{border-color:#222;background:#222}
-    .btn--wa{border-color:#1e8b6f;background:rgba(20,145,113,.12)}
-    .btn--site{border-color:#3953a7;background:rgba(57,83,167,.12)}
-    .btn--maps{border-color:#5a63d6;background:rgba(90,99,214,.12)}
-    .btn:focus-visible{outline:3px solid #7c5cff; outline-offset:2px}
-    @media (prefers-reduced-motion: reduce){
-      *{animation-duration:0.01ms !important; animation-iteration-count:1 !important; transition-duration:0.01ms !important}
-    }
+    @media(max-width:1100px){.grid-cards{grid-template-columns:1fr 1fr}}
+
+    /* player-style bar */
+    .playerbar{position:sticky;bottom:0;left:0;right:0;padding:10px 18px;background:linear-gradient(180deg, rgba(11,17,40,.0), rgba(11,17,40,.65));backdrop-filter:blur(10px);z-index:2;pointer-events:none}
+    .playerbar .pb-wrap, .playerbar .pb-btn, .playerbar input{pointer-events:auto}
+    .pb-wrap{max-width:720px;margin:0 auto;border:1px solid var(--border);border-radius:14px;padding:8px 12px;display:flex;align-items:center;gap:12px;background:rgba(16,20,45,.6)}
+    .pb-btn{height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;font-size:0}
+    #pbPrev::before{content:'\2039';font-size:14px}
+    #pbNext::before{content:'\203A';font-size:14px}
+    .pb-status{min-width:64px;text-align:center;color:var(--muted);font-weight:700}
+    .playerbar input[type="range"]{flex:1}
+    .playerbar input[type="range"]::-webkit-slider-thumb{appearance:none;width:12px;height:12px;border-radius:999px;background:var(--accent);cursor:pointer}
+    .playerbar input[type="range"]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .playerbar input[type="range"]::-moz-range-thumb{width:12px;height:12px;border-radius:999px;background:var(--accent);border:0}
+    .playerbar input[type="range"]::-moz-range-track{height:4px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    @media(max-width:760px){.window{grid-template-columns:1fr}.sidebar{flex-direction:row;justify-content:center;position:sticky;top:0;z-index:5}.form-grid{grid-template-columns:1fr}.grid-cards{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.header{flex-wrap:wrap;gap:10px}}
   </style>
 </head>
 <body>
   <div class="app">
     <div class="window">
       <aside class="sidebar">
-        <div class="brand"><div class="dot"></div><div class="title">Lead Finder</div></div>
-        <div class="nav">
-          <div class="item active">Home</div>
-          <div class="item">Search</div>
-          <div class="item">Saved</div>
+        <div class="dot"></div>
+        <div class="nav" id="nav">
+          <div class="item active" data-target="homePanel">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-10.5z" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span style="font-size:11px">Home</span>
+          </div>
+          <div class="item" data-target="searchPanel">
+            <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.6"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.6"/></svg>
+            <span style="font-size:11px">Search</span>
+          </div>
         </div>
       </aside>
       <section class="main">
         <div class="header">
-          <div class="h1">Discover Leads</div>
+          <div class="h1" id="pageTitle">Discover Leads</div>
           <button id="themeBtn" class="ghost">Dark</button>
         </div>
-        <div class="panel">
+
+        <div id="homePanel" class="panel">
+          <div class="hero">
+            <div class="copy">
+              <h2>Stop guessing. Start finding customers.</h2>
+              <p>Search reliable leads from Google Maps, cleaned and ready. Free while we warm up the engines.</p>
+              <div style="margin-top:14px"><button id="startBtn" class="cta">Start</button></div>
+            </div>
+            <div class="art"></div>
+          </div>
+        </div>
+
+        <div id="searchPanel" class="panel hidden">
           <form id="searchForm" class="form-grid">
             <div>
               <label>Category</label>
-              <select id="category">{% for c in categories %}<option value="{{c}}">{{c}}</option>{% endfor %}</select>
+              <input id="category" list="categoryList" placeholder="Type or choose" />
+              <datalist id="categoryList">{% for c in categories %}<option value="{{c}}"></option>{% endfor %}</datalist>
             </div>
             <div>
               <label>Area</label>
@@ -143,14 +167,12 @@
             <button type="submit" class="primary">Search</button>
           </form>
           <div id="toolbar" class="toolbar" style="display:none">
-            <input id="q" type="text" placeholder="Filter by name or address" style="height:34px;border:1px solid var(--border);border-radius:10px;background:#0b1128;color:var(--text);padding:0 10px;min-width:260px"/>
             <select id="sortBy" class="chip">
               <option value="rating_desc">Sort: Rating ↓</option>
               <option value="reviews_desc">Sort: Reviews ↓</option>
               <option value="name_asc">Sort: Name A–Z</option>
             </select>
             <button id="exportBtn" class="chip">Export CSV (page)</button>
-            <div id="chips" style="display:flex;gap:8px;flex-wrap:wrap"></div>
           </div>
         </div>
 
@@ -161,172 +183,163 @@
             <div id="pagination" class="pagination"></div>
           </section>
         </div>
+        <!-- sticky player-style pagination bar -->
+        <div id="playerBar" class="playerbar" aria-label="Pagination">
+          <div class="pb-wrap">
+            <button id="pbPrev" class="pb-btn" aria-label="Previous page">⏮</button>
+            <div class="pb-status"><span id="pbPage">1</span>/<span id="pbPages">1</span></div>
+            <input id="pbRange" type="range" min="1" max="1" value="1" step="1" />
+            <button id="pbNext" class="pb-btn" aria-label="Next page">⏭</button>
+          </div>
+        </div>
       </section>
     </div>
   </div>
 
-  <div id="loading" class="overlay">
-    <div style="display:flex;align-items:center">
-      <div class="spinner"></div>
-      <div id="stageText" class="stage"></div>
-    </div>
-  </div>
-
+  <div id="loading" class="overlay"><div style="display:flex;align-items:center"><div class="spinner"></div><div id="stageText" class="stage"></div></div></div>
   <div id="toast" class="toast"><div class="bubble" id="toastMsg"></div></div>
 
   <script>
-    const stages=["Searching for leads in this area","Adapting to the category","Collecting data","Cleaning the data","Finalizing"]
-    const state={ items:[], page:1, perPage:20, q:'', sort:'rating_desc' }
-    const qs = (id)=>document.getElementById(id)
+    const stages=["Searching for leads","Adapting to the category","Collecting data","Cleaning the data","Finalizing"]
+    const state={items:[],page:1,pages:1,perPage:20,q:'',sort:'rating_desc',category:'',location:''}
+    const qs=id=>document.getElementById(id)
 
-    function showOverlay(b){ qs('loading').classList.toggle('show', b) }
-    function setStage(t){ const el=qs('stageText'); el.textContent=t }
-    function runStages(done){ showOverlay(true); let i=0; setStage(stages[i]); const tick=()=>{ i++; if(i<stages.length){ setStage(stages[i]); setTimeout(tick,1400) } else { showOverlay(false); done() } }; setTimeout(tick,1400) }
+    function showOverlay(b){qs('loading').classList.toggle('show',b)}
+    function setStage(t){qs('stageText').textContent=t}
+    function runStages(done){showOverlay(true);let i=0;setStage(stages[i]);const tick=()=>{i++;if(i<stages.length){setStage(stages[i]);setTimeout(tick,1100)}else{showOverlay(false);done()}};setTimeout(tick,1100)}
 
-    async function fetchResults(category, location, page, perPage){
-      const params=new URLSearchParams({category, location, page, per_page: perPage});
-      const res=await fetch('/search?'+params.toString());
-      return await res.json();
+    function sanitize(s){if(!s)return'';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML}
+    function normalizeUrl(u){if(!u)return'';try{new URL(u);return u}catch{return 'https://'+u}}
+    function phoneDisplay(p){let s=String(p||'').trim();s=s.replace(/\s+/g,'').replace(/\.0$/,'');return s}
+
+    async function fetchResults(category,location,page,perPage){const params=new URLSearchParams({category,location,page,per_page:perPage});const res=await fetch('/search?'+params.toString());return await res.json()}
+
+    function applySort(arr){if(state.sort==='rating_desc')return[...arr].sort((a,b)=>(parseFloat(b.rating||0))-(parseFloat(a.rating||0)));if(state.sort==='reviews_desc')return[...arr].sort((a,b)=>(parseInt(b.reviews_count||0))-(parseInt(a.reviews_count||0)));if(state.sort==='name_asc')return[...arr].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));return arr}
+    function applyFilter(arr){const q=state.q.trim().toLowerCase();if(!q)return arr;return arr.filter(x=>String(x.name||'').toLowerCase().includes(q)||String(x.address_line||'').toLowerCase().includes(q))}
+
+    function renderPagination(total,pages){const wrap=qs('pagination');wrap.innerHTML='';const mk=(t,p,a=false)=>{const b=document.createElement('button');b.className='pagebtn'+(a?' active':'');b.textContent=t;b.onclick=()=>{if(p===state.page)return;state.page=p;loadPage()};wrap.appendChild(b)};const max=7;let s=Math.max(1,state.page-3);let e=Math.min(pages,s+max-1);s=Math.max(1,e-max+1);if(state.page>1)mk('Prev',state.page-1);for(let i=s;i<=e;i++)mk(String(i),i,i===state.page);if(state.page<pages)mk('Next',state.page+1)}
+
+    function renderCards(items){
+      const wrap=qs('results');
+      wrap.innerHTML=items.map(renderCard).join('');
+      wrap.querySelectorAll('.card').forEach(card=>{
+        const slides=card.querySelectorAll('.slide');
+        const dots=card.querySelector('.dots');
+        const nav=card.querySelector('.navbtn');
+        if(slides.length>1){card.classList.add('multi');}else{if(dots) dots.remove(); if(nav) nav.remove();}
+        // Measure actions height to drive hover expansion and lift
+        const actions=card.querySelector('.actions');
+        if(actions){
+          const h=Math.max(actions.scrollHeight, 34); // at least one row
+          const lift=Math.min(26, Math.max(8, Math.round(h*0.35)));
+          card.style.setProperty('--act-h', (h+10)+ 'px');
+          card.style.setProperty('--lift', lift + 'px');
+        }
+      })
     }
 
-    function sanitize(s){ if(!s) return ''; const d=document.createElement('div'); d.textContent=String(s); return d.innerHTML }
-    function normalizeUrl(u){ if(!u) return ''; try{ new URL(u); return u } catch { return 'https://'+u } }
-    function phoneDisplay(p){ let s=String(p||'').trim(); s=s.replace(/\s+/g,'').replace(/\.0$/,''); return s }
+    function renderAll(meta){const filtered=applyFilter(state.items);const sorted=applySort(filtered);renderCards(sorted);qs('resultsSection').style.display='block';qs('toolbar').style.display='flex';qs('counts').textContent=`${meta.total} items • Page ${meta.page} of ${meta.pages}`;renderPagination(meta.total,meta.pages);updatePlayerBar(meta)}
 
+    function renderCard(x){const phone=x.phone_e164||x.phone||'';const tel=phone?`tel:${encodeURI(phoneDisplay(phone))}`:'';const wa=phone?`https://wa.me/${encodeURIComponent(String(phone).replace(/[^\d]/g,''))}`:'';const site=normalizeUrl(x.website||x.website_fallback||'');const chips=[x.category,x.gmaps_primary_category].filter(Boolean).map(v=>`<span class="chip">${sanitize(v)}</span>`).join('');const stars=x.rating?`<span class="chip chip--rating">⭐ ${sanitize(x.rating)}</span>`:'';const photos=Array.isArray(x.photos)&&x.photos.length?x.photos:(x.main_photo_url?[x.main_photo_url]:[]);const slides=photos.map((u,i)=>`<img src="${sanitize(u)}" alt="" class="slide ${i===0?'active':''}"/>`).join('');const dots=photos.map((_,i)=>`<span class="dot ${i===0?'active':''}" data-idx="${i}"></span>`).join('');return`<article class="card"><div class="cover slides">${slides}</div><div class="navbtn">${photos.length>1?`<button data-role="prev">‹</button><button data-role="next">›</button>`:''}</div><div class="dots">${dots}</div><div class="card-body"><h3 class="title" dir="auto"><a href="${sanitize(x.profile_url||'#')}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:none">${sanitize(x.name||'')}</a></h3><div class="chips">${chips}${stars}</div><div class="meta" dir="auto">${sanitize(x.address_line||'')}</div><div class="actions">${phone?`<a class="btn btn--call" href="${tel}">Call</a>`:''}${phone?`<button class="btn" data-copy="${sanitize(phoneDisplay(phone))}">Copy</button>`:''}${phone?`<a class="btn btn--wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}${site?`<a class="btn btn--site" href="${sanitize(site)}" target="_blank" rel="noopener">Website</a>`:''}${(x.profile_url||'')?`<a class="btn btn--maps" href="${sanitize(x.profile_url)}" target="_blank" rel="noopener">Maps</a>`:''}</div></div></article>`}
+
+    // override with improved centered chips + clean arrows
     function renderCard(x){
-      const phone = x.phone_e164 || x.phone || '';
-      const phoneDial = phoneDisplay(phone);
-      const tel   = phoneDial ? `tel:${encodeURI(phoneDial)}` : '';
-      const wa    = phoneDial ? `https://wa.me/${encodeURIComponent(phoneDial.replace(/[^\d]/g,''))}` : '';
-      const site  = normalizeUrl(x.website || x.website_fallback || '');
-      const chips = [x.category, x.gmaps_primary_category].filter(Boolean)
-                      .map(v=>`<span class="chip">${sanitize(v)}</span>`).join('');
-      const stars = x.rating
-          ? `<span class="chip chip--rating" aria-label="Rating ${sanitize(x.rating)} of 5">⭐ ${sanitize(x.rating)}</span>` : '';
-
-      const photos = Array.isArray(x.photos) && x.photos.length ? x.photos : (x.main_photo_url ? [x.main_photo_url] : [])
-      const slides = photos.map((u,i)=>`<img loading="lazy" src="${sanitize(u)}" alt="" class="slide ${i===0?'active':''}" />`).join('')
-      const controls = photos.length>1 ? `<button class="nav prev" data-role="prev" aria-label="Previous">‹</button><button class="nav next" data-role="next" aria-label="Next">›</button><div class="dots">${photos.map((_,i)=>`<span class=\"dot ${i===0?'active':''}\" data-idx=\"${i}\"></span>`).join('')}</div>` : ''
-      return `
-        <article class="card" role="article">
-          <div class="cover">
-            ${slides}
-            ${controls}
+      const phone=x.phone_e164||x.phone||'';
+      const tel=phone?`tel:${encodeURI(phoneDisplay(phone))}`:'';
+      const wa=phone?`https://wa.me/${encodeURIComponent(String(phone).replace(/[^\d]/g,''))}`:'';
+      const site=normalizeUrl(x.website||x.website_fallback||'');
+      const chips=[x.category,x.gmaps_primary_category]
+        .filter(Boolean)
+        .map(v=>`<span class="chip">${sanitize(v)}</span>`)
+        .join('');
+      const stars=x.rating
+        ? `<span class="chip chip--rating"><span class="star">★</span><span class="val">${sanitize(x.rating)}</span></span>`
+        : '';
+      const photos=Array.isArray(x.photos)&&x.photos.length?x.photos:(x.main_photo_url?[x.main_photo_url]:[]);
+      const slides=photos.map((u,i)=>`<img src="${sanitize(u)}" alt="" class="slide ${i===0?'active':''}"/>`).join('');
+      const dots=photos.map((_,i)=>`<span class="dot ${i===0?'active':''}" data-idx="${i}"></span>`).join('');
+      return `<article class="card">
+        <div class="cover slides">${slides}</div>
+        <div class="navbtn">${photos.length>1?`<button data-role="prev"></button><button data-role="next"></button>`:''}</div>
+        <div class="dots">${dots}</div>
+        <div class="card-body">
+          <h3 class="title" dir="auto"><a href="${sanitize(x.profile_url||'#')}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:none">${sanitize(x.name||'')}</a></h3>
+          <div class="chips">${chips}${stars}</div>
+          <div class="meta" dir="auto">${sanitize(x.address_line||'')}</div>
+          <div class="actions">
+            ${phone?`<a class="btn btn--call" href="${tel}">Call</a>`:''}
+            ${phone?`<button class="btn" data-copy="${sanitize(phoneDisplay(phone))}">Copy</button>`:''}
+            ${phone?`<a class="btn btn--wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}
+            ${site?`<a class="btn btn--site" href="${sanitize(site)}" target="_blank" rel="noopener">Website</a>`:''}
+            ${(x.profile_url||'')?`<a class="btn btn--maps" href="${sanitize(x.profile_url)}" target="_blank" rel="noopener">Maps</a>`:''}
           </div>
-          <div class="card-body">
-            <h3 class="card-title" dir="auto">
-              <a href="${sanitize(x.profile_url||'#')}" target="_blank" rel="noopener noreferrer">${sanitize(x.name)}</a>
-            </h3>
-            <div class="chips">${chips}${stars}</div>
-            <div class="meta" dir="auto">${sanitize(x.address_line||'')}</div>
-            <div class="actions">
-              ${phoneDial ? `<a class="btn btn--call" href="${tel}" aria-label="Call ${sanitize(phoneDial)}">Call</a>` : ''}
-              ${phoneDial ? `<button class="btn btn--copy" data-copy="${sanitize(phoneDial)}" aria-label="Copy phone">Copy</button>` : ''}
-              ${wa    ? `<a class="btn btn--wa" href="${wa}" target="_blank" rel="noopener" aria-label="Open WhatsApp">WhatsApp</a>` : ''}
-              ${site  ? `<a class="btn btn--site" href="${sanitize(site)}" target="_blank" rel="noopener">Website</a>` : ''}
-              ${(x.profile_url||'') ? `<a class="btn btn--maps" href="${sanitize(x.profile_url)}" target="_blank" rel="noopener">Maps</a>` : ''}
-            </div>
-          </div>
-        </article>`;
+        </div>
+      </article>`
     }
 
-    function applySort(arr){
-      if(state.sort==='rating_desc') return [...arr].sort((a,b)=>(parseFloat(b.rating||0))-(parseFloat(a.rating||0)))
-      if(state.sort==='reviews_desc') return [...arr].sort((a,b)=>(parseInt(b.reviews_count||0))-(parseInt(a.reviews_count||0)))
-      if(state.sort==='name_asc') return [...arr].sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')))
-      return arr
-    }
-    function applyFilter(arr){ const q=state.q.trim().toLowerCase(); if(!q) return arr; return arr.filter(x=> String(x.name||'').toLowerCase().includes(q) || String(x.address_line||'').toLowerCase().includes(q)) }
-    function paginate(arr, page, perPage){ const start=(page-1)*perPage; return arr.slice(start, start+perPage) }
+    function debounce(fn,wait=220){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 
-    function renderChips(){ const c=qs('chips'); c.innerHTML=''; if(state.q){ const b=document.createElement('button'); b.className='chip'; b.textContent='Clear filter'; b.onclick=()=>{ state.q=''; qs('q').value=''; renderAll() }; c.appendChild(b) } }
-    function renderPagination(total){ const wrap=qs('pagination'); wrap.innerHTML=''; const pages=Math.max(1, Math.ceil(total/state.perPage)); if(state.page>pages) state.page=pages; const mk=(t,p,a=false)=>{ const b=document.createElement('button'); b.className='pagebtn'+(a?' active':''); b.textContent=t; b.onclick=()=>{ state.page=p; renderAll() }; wrap.appendChild(b)}; const max=7; let s=Math.max(1,state.page-3); let e=Math.min(pages,s+max-1); s=Math.max(1,e-max+1); if(state.page>1) mk('Prev', state.page-1); for(let i=s;i<=e;i++) mk(String(i), i, i===state.page); if(state.page<pages) mk('Next', state.page+1) }
-    function showToast(msg){ const t=qs('toast'); const m=qs('toastMsg'); m.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 1500) }
+    function showToast(msg){const t=qs('toast');qs('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400)}
 
-    function renderAll(){
-      const filtered = applyFilter(state.items)
-      const sorted = applySort(filtered)
-      const pages = Math.max(1, Math.ceil(sorted.length/state.perPage))
-      const pageItems = paginate(sorted, state.page, state.perPage)
-      qs('results').innerHTML = pageItems.map(renderCard).join('')
-      qs('resultsSection').style.display='block'
-      qs('toolbar').style.display='flex'
-      qs('counts').textContent = `${sorted.length} items • Page ${state.page} of ${pages}`
-      renderPagination(sorted.length)
-      renderChips()
-    }
+    document.addEventListener('click',e=>{const t=e.target.closest('[data-copy]');if(!t)return;const v=t.getAttribute('data-copy')||'';navigator.clipboard.writeText(v).then(()=>showToast('Copied phone')).catch(()=>showToast('Copy failed'))})
 
-    function debounce(fn, wait=200){ let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), wait) } }
+    document.addEventListener('click',e=>{const b=e.target.closest('.navbtn button');if(!b)return;const cover=b.closest('.card').querySelector('.cover');const slides=cover.querySelectorAll('.slide');if(!slides.length)return;let idx=0;slides.forEach((s,i)=>{if(s.classList.contains('active'))idx=i});idx=b.dataset.role==='next'?(idx+1)%slides.length:(idx-1+slides.length)%slides.length;slides.forEach((s,i)=>s.classList.toggle('active',i===idx));const dots=b.closest('.card').querySelectorAll('.dots .dot');dots.forEach((d,i)=>d.classList.toggle('active',i===idx))})
 
-    // delegated copy handler
-    document.addEventListener('click', (e)=>{
-      const t = e.target.closest('[data-copy]');
-      if(!t) return;
-      const val = t.getAttribute('data-copy') || '';
-      navigator.clipboard.writeText(val)
-        .then(()=>showToast('Copied phone'))
-        .catch(()=>showToast('Copy failed'));
-    });
+    document.addEventListener('click',e=>{const d=e.target.closest('.dots .dot');if(!d)return;const card=d.closest('.card');const slides=card.querySelectorAll('.slide');const dots=card.querySelectorAll('.dot');const idx=parseInt(d.getAttribute('data-idx')||'0',10)||0;slides.forEach((s,i)=>s.classList.toggle('active',i===idx));dots.forEach((k,i)=>k.classList.toggle('active',i===idx))})
 
-    // delegated slider controls
-    document.addEventListener('click', (e)=>{
-      const btn = e.target.closest('.cover .nav');
-      if(!btn) return;
-      const cover = btn.closest('.cover');
-      const slides = cover.querySelectorAll('img.slide');
-      if(!slides.length) return;
-      let idx = 0;
-      slides.forEach((s,i)=>{ if(s.classList.contains('active')) idx=i });
-      idx = btn.dataset.role === 'next' ? (idx+1)%slides.length : (idx-1+slides.length)%slides.length;
-      slides.forEach((s,i)=> s.classList.toggle('active', i===idx));
-      const dots = cover.querySelectorAll('.dots .dot');
-      dots.forEach((d,i)=> d.classList.toggle('active', i===idx));
-    });
+    async function loadPage(){runStages(async()=>{const data=await fetchResults(state.category,state.location,state.page,state.perPage);state.items=data.items;state.pages=data.pages;renderAll({total:data.total,page:data.page,pages:data.pages});window.scrollTo({top:document.body.offsetTop})})}
 
-    document.addEventListener('click', (e)=>{
-      const dot = e.target.closest('.cover .dots .dot');
-      if(!dot) return;
-      const cover = dot.closest('.cover');
-      const slides = cover.querySelectorAll('img.slide');
-      const dots = cover.querySelectorAll('.dots .dot');
-      const idx = parseInt(dot.getAttribute('data-idx')||'0',10) || 0;
-      slides.forEach((s,i)=> s.classList.toggle('active', i===idx));
-      dots.forEach((d,i)=> d.classList.toggle('active', i===idx));
-    });
+    function updatePlayerBar(meta){const bar=document.getElementById('playerBar');if(!bar) return;const p=qs('pbPage'), P=qs('pbPages'), r=qs('pbRange');const hasPages = (meta && meta.pages && meta.pages>1);bar.style.display = hasPages ? 'block' : 'none';if(!hasPages) return; p.textContent=String(meta.page);P.textContent=String(meta.pages);r.max=String(Math.max(1,meta.pages));r.value=String(Math.min(meta.pages, Math.max(1,state.page)))}
+
+    function hookPlayerBar(){const prev=qs('pbPrev'), next=qs('pbNext'), r=qs('pbRange');if(prev)prev.onclick=()=>{if(state.page>1){state.page--;loadPage()}};if(next)next.onclick=()=>{if(state.page<state.pages){state.page++;loadPage()}};if(r)r.oninput=(e)=>{const v=parseInt(e.target.value||'1',10);if(v!==state.page){state.page=v;loadPage()}}}
+
+    function activatePanel(id){['homePanel','searchPanel'].forEach(pid=>qs(pid).classList.toggle('hidden',pid!==id));document.querySelectorAll('.nav .item').forEach(el=>{el.classList.toggle('active',el.dataset.target===id)});qs('pageTitle').textContent=id==='homePanel'?'Welcome':'Discover Leads';if(id==='searchPanel'){const c=qs('category');if(c)c.focus()}}
 
     function init(){
-      const form=qs('searchForm'); const category=qs('category'); const location=qs('location'); const perPage=qs('perPage')
-      const q=qs('q'); const sortBy=qs('sortBy'); const exportBtn=qs('exportBtn'); const themeBtn=qs('themeBtn')
-
-      function exportCSV(){ const lines=[["name","category","address","phone","website","rating"]]; const filtered=applySort(applyFilter(state.items)); const pageItems=paginate(filtered, state.page, state.perPage); pageItems.forEach(x=>{ lines.push([x.name||'',x.category||'',x.address_line||'',x.phone_e164||'',(x.website||x.website_fallback||''),x.rating||'']) }); const csv = lines.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='leads_page.csv'; a.click(); URL.revokeObjectURL(url) }
-
-      // restore persisted UI state
-      const saved = {
-        category: localStorage.getItem('lf.category')||'',
-        location: localStorage.getItem('lf.location')||'',
-        perPage: localStorage.getItem('lf.perPage')||'',
-        sort: localStorage.getItem('lf.sort')||''
+      hookPlayerBar();
+      updatePlayerBar({pages:0});
+      const form=qs('searchForm');
+      const category=qs('category');
+      const location=qs('location');
+      const perPage=qs('perPage');
+      const sortBy=qs('sortBy');
+      const exportBtn=qs('exportBtn');
+      const themeBtn=qs('themeBtn');
+      const saved={category:localStorage.getItem('lf.category')||'',location:localStorage.getItem('lf.location')||'',perPage:localStorage.getItem('lf.perPage')||'',sort:localStorage.getItem('lf.sort')||''};
+      const setIfOptionExists=(sel,val)=>{if(!val||!sel||!sel.options)return;for(const o of sel.options){if(o.value===val){sel.value=val;break}}};
+      if(saved.category) category.value = saved.category;
+      setIfOptionExists(location,saved.location);
+      if(saved.perPage)perPage.value=saved.perPage;
+      if(saved.sort){sortBy.value=saved.sort;state.sort=saved.sort}
+      // Normalize to known category if typed
+      const normalizeCategory=(val)=>{
+        const opts=Array.from(document.querySelectorAll('#categoryList option')).map(o=>o.value);
+        const exact=opts.find(x=>x.toLowerCase()===String(val||'').trim().toLowerCase());
+        return exact || String(val||'').trim();
       }
-      const setIfOptionExists=(sel,val)=>{ if(!val) return; for(const o of sel.options){ if(o.value===val){ sel.value=val; break } } }
-      setIfOptionExists(category, saved.category)
-      setIfOptionExists(location, saved.location)
-      if(saved.perPage) perPage.value = saved.perPage
-      if(saved.sort) sortBy.value = saved.sort, state.sort = saved.sort
-
-      form.addEventListener('submit', async (e)=>{ e.preventDefault(); state.perPage=parseInt(perPage.value||20); state.page=1; localStorage.setItem('lf.category', category.value); localStorage.setItem('lf.location', location.value); localStorage.setItem('lf.perPage', String(state.perPage)); runStages(async ()=>{ const data = await fetchResults(category.value, location.value, 1, state.perPage); state.items = data.items; renderAll(); window.scrollTo({top: document.body.offsetTop}) }) })
-      q.addEventListener('input', debounce(()=>{ state.q=q.value; state.page=1; renderAll() }, 200))
-      sortBy.addEventListener('change', ()=>{ state.sort=sortBy.value; localStorage.setItem('lf.sort', state.sort); renderAll() })
-      exportBtn.addEventListener('click', ()=> exportCSV())
-      themeBtn.addEventListener('click', ()=>{ document.body.classList.toggle('light') })
-      // Auto search disabled by default. Enable by setting
-      // localStorage.setItem('lf.autosearch','1') and having both values.
-      const auto = localStorage.getItem('lf.autosearch') === '1'
-      if(auto && saved.category && saved.location){
-        form.dispatchEvent(new Event('submit'))
-      }
+      form.addEventListener('submit',e=>{e.preventDefault();state.category=normalizeCategory(category.value);state.location=location.value;state.perPage=parseInt(perPage.value||20);state.page=1;localStorage.setItem('lf.category',state.category);localStorage.setItem('lf.location',state.location);localStorage.setItem('lf.perPage',String(state.perPage));activatePanel('searchPanel');loadPage()});
+      sortBy.addEventListener('change',()=>{state.sort=sortBy.value;localStorage.setItem('lf.sort',state.sort);renderAll({total:state.items.length,page:state.page,pages:state.pages})});
+      exportBtn.addEventListener('click', () => { const lines=[["name","category","address","phone","website","rating"],...applySort(applyFilter(state.items)).map(x=>[x.name||'',x.category||'',x.address_line||'',x.phone_e164||'',x.website||x.website_fallback||'',x.rating||''])]; const csv=lines.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); const bom="\uFEFF"; const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="leads_page.csv"; a.click(); URL.revokeObjectURL(url); });
+      document.getElementById('nav').addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;activatePanel(it.dataset.target)});
+      document.getElementById('startBtn').addEventListener('click',()=>activatePanel('searchPanel'))
+      // Recalculate actions height on resize so hover space adapts
+      const recalc=()=>{document.querySelectorAll('#results .card').forEach(card=>{const actions=card.querySelector('.actions');if(actions){const h=Math.max(actions.scrollHeight,34);const lift=Math.min(26,Math.max(8,Math.round(h*0.35)));card.style.setProperty('--act-h',(h+10)+'px');card.style.setProperty('--lift',lift+'px')}})}
+      window.addEventListener('resize', debounce(recalc,180));
     }
 
     init()
+
+    // simple autoplay for cards with multiple images, pause on hover
+    setInterval(()=>{
+      document.querySelectorAll('.card.multi').forEach(card=>{
+        if(card.matches(':hover')) return;
+        const slides=card.querySelectorAll('.slide'); if(slides.length<2) return;
+        let idx=0; slides.forEach((s,i)=>{ if(s.classList.contains('active')) idx=i });
+        idx=(idx+1)%slides.length;
+        slides.forEach((s,i)=>s.classList.toggle('active', i===idx));
+        const dots=card.querySelectorAll('.dots .dot'); dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
+      })
+    }, 4200)
   </script>
 </body>
 </html>
