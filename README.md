@@ -67,7 +67,9 @@ py maps.py --categories-file categories.txt --location "Cairo, Egypt" --max-plac
 
 py csv_cleaner.py --in results.csv --out Cleaned.csv
 
+
 py supabase_push.py Cleaned.csv
+```
 🕒 GitHub Actions (Auto-Scraping)
 
 The repo includes a workflow that:
