@@ -329,13 +329,10 @@
               </a>
             </div>
           </div>
+          <div class="footer" id="homeFooter">
+            <div>© <span id="year"></span> LeadSignal | All rights reserved</div>
+          </div>
         </div><!-- /#homePanel -->
-
-        <!-- Global footer (visible on both panels) -->
-        <div class="footer">
-          <div>© <span id="year"></span> LeadSignal | All rights reserved</div>
-          <div><a href="#" id="jumpSearch">Go to Search →</a></div>
-        </div>
 
         <!-- Search Panel -->
         <div id="searchPanel" class="panel hidden">
@@ -535,7 +532,6 @@
       exportBtn.addEventListener('click',()=>{const lines=[["name","category","address","phone","website","rating"],...applySort(applyFilter(state.items)).map(x=>[x.name||'',x.category||'',x.address_line||'',x.phone_e164||'',x.website||x.website_fallback||'',x.rating||''])];const csv=lines.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');const bom="\uFEFF";const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download="leads_page.csv";a.click();URL.revokeObjectURL(url);});
       document.getElementById('nav').addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;activatePanel(it.dataset.target)});
       document.getElementById('startBtn').addEventListener('click',()=>activatePanel('searchPanel'));
-      document.getElementById('jumpSearch').addEventListener('click',(e)=>{e.preventDefault();activatePanel('searchPanel')});
       const y=qs('year'); if(y) y.textContent=(new Date()).getFullYear();
     }
 
