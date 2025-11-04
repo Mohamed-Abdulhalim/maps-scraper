@@ -295,136 +295,152 @@ def open_card_detail(driver, card) -> None:
         pass
 
 
-def grab_address_and_plus(driver):
-    selectors = [
-        ("xpath", "//button[@data-item-id='address']"),
-        ("xpath", "//button[contains(@aria-label, 'Address')]"),
-        ("xpath", "//div[contains(text(),'Address') or contains(text(),'العنوان')]")
+# ----------------------
+# FIXES PORTED FROM V2
+# ----------------------
+
+def _get_results_feed(driver):
+    xpaths = [
+        "//div[@role='feed' and contains(@class,'m6QErb')]",
+        "//div[@role='feed' and starts-with(@aria-label, 'Results for')]",
+        "//div[contains(@class,'m6QErb') and (starts-with(@aria-label,'Results for') or @role='feed')]",
     ]
-    for mode, sel in selectors:
+    for xp in xpaths:
         try:
-            el = driver.find_element(By.XPATH, sel) if mode == "xpath" else driver.find_element(By.CSS_SELECTOR, sel)
-            txt = el.get_attribute("aria-label") or el.text
-            if txt:
-                txt = txt.replace("\n", " ").strip()
-                plus = ""
-                m = re.search(r"[A-Z0-9]{4}\+[A-Z0-9]{2,}", txt)
-                if m:
-                    plus = m.group(0)
-                txt = re.sub(r"[A-Z0-9]{4}\+[A-Z0-9]{2,}", "", txt).strip()
-                return txt, plus
+            el = driver.find_element(By.XPATH, xp)
+            if el:
+                return el
         except Exception:
             pass
-    return "", ""
-
-
-def extract_detail(driver) -> Dict[str, str]:
-    name = rating = reviews_count = opening_hours = address = phone = website = ""
-    social_links: List[str] = []
-    photos: List[str] = []
-    plus_code = ""
-
     try:
-        el = driver.find_element(By.XPATH, DETAIL_NAME_XP)
-        name = safe_text(el)
+        return driver.find_element(By.CSS_SELECTOR, "div.m6QErb")
+    except Exception:
+        return None
+
+
+def _click_more_places_if_present(driver):
+    candidates = [
+        (By.XPATH, "//button[.//span[contains(.,'More places') or contains(.,'View all')]]"),
+        (By.XPATH, "//a[contains(.,'More places') or contains(.,'View all')]"),
+        (By.XPATH, "//button[contains(.,'More places') or contains(.,'View all')]"),
+    ]
+    for by, sel in candidates:
+        try:
+            el = WebDriverWait(driver, 2.5).until(EC.element_to_be_clickable((by, sel)))
+            logging.info("Clicking entry chip: %s", safe_text(el))
+            driver.execute_script("arguments[0].scrollIntoView({block:'center'});", el)
+            jitter(0.2, 0.5)
+            el.click()
+            jitter(0.8, 1.2)
+            return True
+        except Exception:
+            continue
+    return False
+
+
+def _zoom_out_once(driver):
+    try:
+        btn = driver.find_element(By.XPATH, "//button[@aria-label='Zoom out']")
+        driver.execute_script("arguments[0].scrollIntoView({block:'center'});", btn)
+        jitter(0.1, 0.3)
+        btn.click()
+        jitter(0.3, 0.6)
     except Exception:
         pass
 
-    try:
-        el = driver.find_element(By.XPATH, DETAIL_RATING_XP)
-        rating = clean_rating_text(el.get_attribute("aria-label") or safe_text(el))
-    except Exception:
-        pass
 
+def scroll_results_pane(driver, seen: Optional[Set[str]] = None, category: str = "") -> None:
+    _click_more_places_if_present(driver)
+    feed = None
     try:
-        el = driver.find_element(By.XPATH, DETAIL_REVIEW_COUNT_XP)
-        reviews_count = clean_reviews_text(safe_text(el))
-    except Exception:
-        pass
-
-    try:
-        el = driver.find_element(By.XPATH, DETAIL_HOURS_STATUS_XP)
-        opening_hours = safe_text(el)
-    except Exception:
-        pass
-
-    addr, plus = grab_address_and_plus(driver)
-    address = addr; plus_code = plus
-
-    try:
-        el = driver.find_element(By.XPATH, DETAIL_PHONE_XP)
-        p = el.get_attribute("href") or safe_text(el)
-        if p.startswith("tel:"):
-            p = p.replace("tel:", "")
-        phone = strong_phone_extract(p) or p.strip()
-    except Exception:
-        pass
-
-    try:
-        el = driver.find_element(By.XPATH, DETAIL_WEBSITE_BTN_XP)
-        website = el.get_attribute("href") or ""
-    except Exception:
-        pass
-
-    try:
-        links = driver.find_elements(By.XPATH, DETAIL_SOCIAL_LINKS_XP)
-        social_links = list({l.get_attribute("href") for l in links if l.get_attribute("href")})
-    except Exception:
-        pass
-
-    # wait briefly for images to swap from placeholders to real URLs
-    try:
-        WebDriverWait(driver, 6).until(
-            lambda d: any(
-                (e.get_attribute("src") or "").startswith("http")
-                for e in d.find_elements(By.XPATH, DETAIL_PHOTOS_IMG_XP)
-            )
-        )
+        feed = WebDriverWait(driver, 10).until(lambda d: _get_results_feed(d))
     except TimeoutException:
-        pass
+        logging.warning("Results feed not found; falling back to body scroll.")
+    if feed is None:
+        try:
+            feed = driver.find_element(By.TAG_NAME, "body")
+        except Exception:
+            return
 
     try:
-        imgs = driver.find_elements(By.XPATH, DETAIL_PHOTOS_IMG_XP)
-        for im in imgs[:6]:
-            src = (im.get_attribute("src") or "").strip()
-            if src.startswith("http"):
-                photos.append(src)
+        driver.execute_script("arguments[0].scrollIntoView({block:'nearest'});", feed)
+        jitter(0.15, 0.35)
+        feed.click()
     except Exception:
         pass
 
-    return {
-        "name": name,
-        "rating": rating,
-        "reviews_count": reviews_count,
-        "opening_hours": opening_hours,
-        "address": address,
-        "plus_code": plus_code,
-        "phone": phone,
-        "website": website,
-        "social_links": ", ".join(social_links),
-        "photo_urls": ", ".join(photos),
-    }
-
-
-def scroll_results_pane(driver) -> None:
-    body = driver.find_element(By.TAG_NAME, "body")
     last_count = 0
-    same_count_runs = 0
+    no_growth_runs = 0
     for i in range(MAX_SCROLL_TRIES):
         cards = driver.find_elements(By.CSS_SELECTOR, CARD_CONTAINER_CSS)
         count = len(cards)
-        logging.info("Scroll batch %d: %d cards visible", i + 1, count)
-        if count == last_count:
-            same_count_runs += 1
+        uniq = len(seen) if seen is not None else -1
+        logging.info("[scroll %02d] visible_cards=%d%s", i + 1, count, (f" | uniques_so_far={uniq}" if uniq >= 0 else ""))
+
+        prev_count = count
+        try:
+            prev_height = driver.execute_script("return arguments[0].scrollHeight", feed)
+            prev_top = driver.execute_script("return arguments[0].scrollTop", feed)
+        except Exception:
+            prev_height = None; prev_top = None
+
+        steps = random.randint(3, 6)
+        for _ in range(steps):
+            delta = random.randint(320, 800)
+            try:
+                driver.execute_script("arguments[0].scrollBy(0, arguments[1]);", feed, delta)
+            except Exception:
+                try:
+                    driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
+                except Exception:
+                    pass
+            jitter(0.25, 0.7)
+
+        deadline = time.time() + random.uniform(5.5, 8.0)
+        grew = False
+        reached_end_hint = False
+        while time.time() < deadline:
+            try:
+                cards_now = driver.find_elements(By.CSS_SELECTOR, CARD_CONTAINER_CSS)
+                if len(cards_now) > prev_count:
+                    grew = True
+                    break
+                if feed is not None:
+                    h = driver.execute_script("return arguments[0].scrollHeight", feed)
+                    t = driver.execute_script("return arguments[0].scrollTop", feed)
+                    ch = driver.execute_script("return arguments[0].clientHeight", feed)
+                    if prev_height is not None and h > prev_height + 12:
+                        grew = True
+                        break
+                    if t + ch >= h - 4:
+                        reached_end_hint = True
+                        break
+                try:
+                    end_nodes = driver.find_elements(
+                        By.XPATH,
+                        "//span[contains(. ,\"You've reached the end\") or contains(. ,\"You\u2019ve reached the end\")] | //div[contains(. ,\"You've reached the end\") or contains(. ,\"You\u2019ve reached the end\")]",
+                    )
+                    if end_nodes:
+                        reached_end_hint = True
+                        break
+                except Exception:
+                    pass
+            except Exception:
+                pass
+            time.sleep(0.25)
+
+        if not grew:
+            no_growth_runs += 1
         else:
-            same_count_runs = 0
-        last_count = count
-        if same_count_runs >= 2:
-            logging.info("No more cards are loading. Stopping scroll.")
+            no_growth_runs = 0
+
+        if reached_end_hint or no_growth_runs >= 3:
+            logging.info("Stopping scroll: %s", "end-of-list" if reached_end_hint else f"no-growth x{no_growth_runs}")
             break
-        for _ in range(SCROLL_BATCH):
-            body.send_keys(Keys.END)
-            jitter(0.6, 1.2)
+
+# ----------------------
+# END FIXES PORTED FROM V2
+# ----------------------
 
 
 def build_search_url(query: str, location: str, hl: str = "en", gl: str = "eg") -> str:
@@ -456,13 +472,15 @@ def harvest_category(driver, category: str, location: str, csv_path: str, seen: 
     logging.info("Navigating to search: %s", url)
     get_with_retry(driver, url, tries=2, cool=2.5)
     jitter(1.0, 1.6)
-    cards = any_present(driver, [(By.CSS_SELECTOR, CARD_CONTAINER_CSS)], timeout=10)
-    if not cards:
-        scroll_results_pane(driver)
-    total_written = 0
-    scroll_results_pane(driver)
+
+    # FIXES: optional zoom-out once, click More places, robust scroll of feed with telemetry
+    _zoom_out_once(driver)
+    _click_more_places_if_present(driver)
+    scroll_results_pane(driver, seen=seen, category=category)
+
     cards = driver.find_elements(By.CSS_SELECTOR, CARD_CONTAINER_CSS)
     logging.info("Total cards discovered for '%s': %d", category, len(cards))
+    total_written = 0
     for idx, card in enumerate(cards, start=1):
         try:
             basic = extract_card_basic(driver, card)
@@ -602,5 +620,3 @@ def _norm(s: str) -> str:
 
 if __name__ == "__main__":
     main()
-
-
