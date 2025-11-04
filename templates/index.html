@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="no-prm">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,6 +8,7 @@
     :root{--bg1:#3820a6;--bg2:#0f1226;--glass:rgba(16,20,45,.55);--glass2:rgba(25,30,65,.55);--border:rgba(255,255,255,.08);--text:#eaf0ff;--muted:#96a1c9;--accent:#7c5cff;--accent2:#3aa0ff;--chip:#1e2346;--success:#15b888;--hot:#ff355d}
     *{box-sizing:border-box}html,body{height:100%}
     body{margin:0;color:var(--text);background:radial-gradient(1200px 600px at 20% -10%,var(--bg1),transparent),radial-gradient(1200px 700px at 120% 120%,#2d1d7a,transparent),linear-gradient(180deg,#1b1f3b 0%,var(--bg2) 100%);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial}
+    a{color:inherit}
     .app{max-width:1240px;margin:42px auto;padding:0 16px}
     .window{display:grid;grid-template-columns:84px 1fr;background:var(--glass);backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.35)}
     .sidebar{background:var(--glass2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 10px;gap:12px}
@@ -16,7 +17,6 @@
     .nav .item{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 0;border-radius:12px;color:var(--muted);cursor:pointer;user-select:none;position:relative;transition:background .2s ease,color .2s ease}
     .nav .item.active{background:rgba(255,255,255,.06);color:#fff}
     .nav svg{width:22px;height:22px}
-    /* red accent bar for active/hovered nav item */
     .nav .item::before{content:"";position:absolute;left:6px;top:50%;transform:translateY(-50%) scaleY(.4);width:4px;height:24px;border-radius:999px;background:linear-gradient(180deg,#ff6a80,var(--hot));box-shadow:0 0 10px rgba(255,53,93,.6);opacity:0;transition:opacity .2s ease, transform .2s ease}
     .nav .item:hover::before,.nav .item.active::before{opacity:1;transform:translateY(-50%) scaleY(1)}
 
@@ -28,12 +28,78 @@
     .panel{padding:18px 22px;border-bottom:1px solid var(--border)}
     .panel.hidden{display:none}
 
-    .hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center}
-    .hero .copy h2{margin:0 0 6px;font-size:28px}
-    .hero .copy p{margin:0;color:var(--muted)}
+    .hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:center}
+    .hero .eyebrow{display:inline-flex;gap:8px;align-items:center;font-size:12px;color:#c9d3ff;background:rgba(255,255,255,.06);border:1px solid var(--border);padding:6px 10px;border-radius:999px;margin-bottom:10px}
+    .hero .eyebrow .zap{display:inline-block;margin-right:8px;color:#ffd54a;animation:zapPulse 1.15s ease-in-out infinite, zapGlow 1.15s ease-in-out infinite;will-change:transform,filter}
+    @keyframes zapPulse{0%,100%{transform:translateY(0) rotate(0deg) scale(1)}50%{transform:translateY(-1px) rotate(-10deg) scale(1.1)}}
+    @keyframes zapGlow{0%,100%{filter:drop-shadow(0 0 0 rgba(255,230,120,0))}50%{filter:drop-shadow(0 0 10px rgba(255,230,120,.95))}}
+    @media (prefers-reduced-motion: reduce){.hero .eyebrow .zap{animation:none}}
+    .hero .copy h2{margin:0 0 6px;font-size:34px;letter-spacing:.2px}
+    .hero .copy p{margin:6px 0 0;color:var(--muted);max-width:52ch}
     .cta{height:44px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:12px;padding:0 18px;font-weight:800;cursor:pointer}
-    .hero .art{height:180px;border-radius:14px;overflow:hidden;position:relative;background:#0e1430}
-    .hero .art::after{content:"";position:absolute;inset:0;background:radial-gradient(500px 200px at 10% 100%,rgba(124,92,255,.35),transparent),radial-gradient(400px 240px at 90% 0%,rgba(58,160,255,.35),transparent)}
+    .cta.secondary{background:transparent;border:1px solid var(--border)}
+    .hero .cta-row{display:flex;gap:10px;margin-top:16px}
+
+    .hero .art { position: relative; width: auto; height: auto; aspect-ratio: auto; border-radius: 0; overflow: visible; background: transparent; box-shadow: none; padding: 0; }
+    .hero .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+    .hero .art::after{content:none}
+    .hero .art,.hero .art *{pointer-events:none;cursor:default}
+
+    /* Hero logo mode */
+    .art--logo{display:flex;align-items:center;justify-content:center;background:radial-gradient(900px 420px at 80% -10%,rgba(124,92,255,.18),transparent),radial-gradient(700px 520px at -20% 120%,rgba(58,160,255,.16),transparent),#0e1430;perspective:1000px}
+    .logo3d { position: relative; display: flex; align-items: center; gap: 18px; padding: 22px 26px; border-radius: 18px; background: rgba(255, 255, 255, .04); border: 1px solid var(--border); transform-style: preserve-3d; will-change: transform; transition: transform .25s ease, box-shadow .25s ease; box-shadow: 0 14px 40px rgba(0, 0, 0, .4); margin: 0 auto; }
+    .logo3d:hover{box-shadow:0 28px 80px rgba(0,0,0,.45)}
+    .logo-icon svg{display:block;filter:drop-shadow(0 6px 18px rgba(56,128,255,.35))}
+    .logo-word{font-weight:900;font-size:clamp(26px,3.2vw,42px);letter-spacing:.4px;line-height:1;background:linear-gradient(120deg,#7cc0ff,#3a8bff,#1d4ed8);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:logoSweep 6s ease-in-out infinite;transform:translateZ(40px);text-shadow:0 2px 16px rgba(30,64,175,.35)}
+    @keyframes logoSweep{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+    .logo-shine{position:absolute;inset:-100px;background:radial-gradient(400px 140px at var(--sx,20%) var(--sy,0%),rgba(120,180,255,.22),transparent 55%);mix-blend-mode:screen;pointer-events:none;transform:translateZ(60px)}
+    /* Let mouse reach the logo when in logo mode */
+    .hero .art.art--logo::after{pointer-events:none}
+    /* Re-enable interactivity for the logo variant */
+    .hero .art.art--logo,
+    .hero .art.art--logo *{pointer-events:auto !important;cursor:default}
+    @media (prefers-reduced-motion: reduce){.logo-word{animation:none}}
+
+    /* radar spin on hover; arcs rotate around center */
+    .logo3d .arc{transform-box:view-box;transform-origin:50% 50%}
+    .logo3d .arc--cw{animation:spinCW 2.6s linear infinite}
+    .logo3d .arc--ccw{animation:spinCCW 2.6s linear infinite}
+    @keyframes spinCW{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+    @keyframes spinCCW{from{transform:rotate(0)}to{transform:rotate(-360deg)}}
+    @media (prefers-reduced-motion: reduce){.logo3d .arc--cw,.logo3d .arc--ccw{animation:none}}
+
+    /* scroll-in reveal */
+    .reveal-stagger>*{opacity:0;transform:translateY(18px);will-change:opacity,transform}
+    .reveal-stagger.is-in>*{animation:riseIn .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+    @keyframes riseIn{to{opacity:1;transform:translateY(0)}}
+    @media (prefers-reduced-motion: reduce){.reveal-stagger>*{opacity:1;transform:none}.reveal-stagger.is-in>*{animation:none}}
+    /* Force animation even if OS prefers-reduced-motion (opt-in via html.no-prm) */
+    .no-prm .reveal-stagger>*{opacity:0;transform:translateY(18px)}
+    .no-prm .reveal-stagger.is-in>*{animation:riseIn .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0ms)}
+
+    .proof{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+    .metric{display:flex;gap:10px;align-items:center;border:1px solid var(--border);background:rgba(255,255,255,.04);padding:10px 12px;border-radius:12px}
+    .metric .k{font-weight:900;font-size:18px}
+    .metric .d{font-size:12px;color:var(--muted)}
+
+    .home-section{margin-top:18px}
+    .home-h3{font-size:16px;margin:0 0 10px;font-weight:900}
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .feature{border:1px solid var(--border);background:rgba(255,255,255,.04);border-radius:14px;padding:14px}
+    .feature h4{margin:0 0 6px;font-size:15px}
+    .feature p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+
+    .usecases{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .use{border:1px solid var(--border);background:rgba(255,255,255,.04);border-radius:14px;padding:14px}
+    .use h4{margin:0 0 6px;font-size:15px}
+    .use ul{margin:6px 0 0 18px;padding:0;color:var(--muted);font-size:13px}
+
+    .faq{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .qa{border:1px solid var(--border);background:rgba(255,255,255,.04);border-radius:14px;padding:14px}
+    .qa h4{margin:0 0 6px;font-size:14px}
+    .qa p{margin:0;color:var(--muted);font-size:13px;line-height:1.5}
+
+    .footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px;color:var(--muted);font-size:12px;margin-top:16px}
 
     .form-grid{display:grid;grid-template-columns:2fr 2fr 1fr auto;gap:12px;align-items:end}
     label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
@@ -42,7 +108,6 @@
     .primary{height:40px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:12px;padding:0 16px;font-weight:800;cursor:pointer}
 
     .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    /* Center chip content vertically and horizontally */
     .chip{display:inline-flex;align-items:center;justify-content:center;height:36px;line-height:1;padding:0 12px;border-radius:999px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#bfc7ff;font-weight:700}
 
     .content{padding:18px 22px}
@@ -71,11 +136,8 @@
     .chip--rating{color:#ffd579;border-color:rgba(255,213,121,.35);background:rgba(255,213,121,.12)}
     .chip--rating .star{display:inline-block;font-size:14px;line-height:1;margin-right:6px;filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
 
-    /* Animated reveal: reserve no height by default, expand on hover */
     .actions{display:flex;flex-wrap:wrap;gap:8px;overflow:hidden;max-height:0;padding-top:0;margin-top:0;opacity:0;transform:translateY(8px);transition:max-height .32s ease, padding .32s ease, opacity .22s ease, transform .22s ease}
-    /* Use per-card variable --act-h set by JS to make enough room */
     .card:hover .actions{max-height:var(--act-h,72px);padding-top:8px;opacity:1;transform:translateY(0)}
-    /* Lift chips + address by a variable amount derived from actions height */
     .chips,.meta{transition:transform .28s ease}
     .card:hover .chips,.card:hover .meta{transform:translateY(calc(-1 * var(--lift, 10px)))}
     .btn{height:34px;padding:0 12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:#eaf0ff;text-decoration:none;display:inline-flex;align-items:center;font-weight:700}
@@ -98,11 +160,14 @@
     .toast .bubble{background:#11172f;color:#fff;border:1px solid var(--border);padding:8px 12px;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
     .toast.show{display:block}
 
-    @media(max-width:1100px){.grid-cards{grid-template-columns:1fr 1fr}}
+    @media(max-width:1100px){.grid-cards{grid-template-columns:1fr 1fr}.features,.usecases,.faq{grid-template-columns:1fr}}
+    @media(max-width:760px){.window{grid-template-columns:1fr}.sidebar{flex-direction:row;justify-content:center;position:sticky;top:0;z-index:5}.form-grid{grid-template-columns:1fr}.grid-cards{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.header{flex-wrap:wrap;gap:10px}.proof{grid-template-columns:1fr}}
 
-    /* player-style bar */
-    .playerbar{position:sticky;bottom:0;left:0;right:0;padding:10px 18px;background:linear-gradient(180deg, rgba(11,17,40,.0), rgba(11,17,40,.65));backdrop-filter:blur(10px);z-index:2;pointer-events:none}
-    .playerbar .pb-wrap, .playerbar .pb-btn, .playerbar input{pointer-events:auto}
+    @media (max-width:900px){.hero{grid-template-columns:1fr}.hero .art{height:clamp(180px,45vw,420px);aspect-ratio:16/9}}
+    @media (min-width:1600px){.hero{grid-template-columns:minmax(0,1fr) auto}}
+
+    .playerbar{display:none;position:sticky;bottom:0;left:0;right:0;padding:10px 18px;background:linear-gradient(180deg, rgba(11,17,40,.0), rgba(11,17,40,.65));backdrop-filter:blur(10px);z-index:2;pointer-events:none}
+    .playerbar .pb-wrap,.playerbar .pb-btn,.playerbar input{pointer-events:auto}
     .pb-wrap{max-width:720px;margin:0 auto;border:1px solid var(--border);border-radius:14px;padding:8px 12px;display:flex;align-items:center;gap:12px;background:rgba(16,20,45,.6)}
     .pb-btn{height:32px;padding:0 10px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:#fff;cursor:pointer;font-size:0}
     #pbPrev::before{content:'\2039';font-size:14px}
@@ -113,7 +178,16 @@
     .playerbar input[type="range"]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
     .playerbar input[type="range"]::-moz-range-thumb{width:12px;height:12px;border-radius:999px;background:var(--accent);border:0}
     .playerbar input[type="range"]::-moz-range-track{height:4px;border-radius:999px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
-    @media(max-width:760px){.window{grid-template-columns:1fr}.sidebar{flex-direction:row;justify-content:center;position:sticky;top:0;z-index:5}.form-grid{grid-template-columns:1fr}.grid-cards{grid-template-columns:1fr}.hero{grid-template-columns:1fr}.header{flex-wrap:wrap;gap:10px}}
+    /* extra-tight mobile tweaks */
+    @media (max-width: 480px){
+      .app{margin:18px auto;padding:0 10px}
+      .header{padding:14px 16px}
+      .panel{padding:14px 16px}
+      .hero .copy h2{font-size:26px}
+      .card{height:260px}
+      .btn{height:32px;padding:0 10px}
+      .chip{height:32px;padding:0 10px}
+    }
   </style>
 </head>
 <body>
@@ -135,17 +209,79 @@
       <section class="main">
         <div class="header">
           <div class="h1" id="pageTitle">Discover Leads</div>
-          <button id="themeBtn" class="ghost">Dark</button>
         </div>
 
         <div id="homePanel" class="panel">
           <div class="hero">
             <div class="copy">
-              <h2>Stop guessing. Start finding customers.</h2>
-              <p>Search reliable leads from Google Maps, cleaned and ready. Free while we warm up the engines.</p>
-              <div style="margin-top:14px"><button id="startBtn" class="cta">Start</button></div>
+              <div class="eyebrow">⚡ Instant lead lists • No scraping required</div>
+              <h2>Find real businesses. Contact them today.</h2>
+              <p>Pull cleaned leads from Google Maps: phones, WhatsApp, addresses, photos and ratings. Filter by city and category, then export to CSV. Free while we warm up the engines.</p>
+              <div class="cta-row">
+                <button id="startBtn" class="cta">Start searching</button>
+                <button id="seeSampleBtn" class="cta secondary">See a sample</button>
+              </div>
+              <div class="proof">
+                <div class="metric"><div class="k" id="mLeads">25k+</div><div class="d">rows processed</div></div>
+                <div class="metric"><div class="k">~92%</div><div class="d">phone coverage</div></div>
+                <div class="metric"><div class="k"><span id="mCities">12</span></div><div class="d">Egypt cities</div></div>
+              </div>
             </div>
-            <div class="art"></div>
+            <div class="art art--logo" id="homePreview">
+              <div class="logo3d" aria-label="LeadSignal logo">
+                <div class="logo-icon" aria-hidden="true">
+                  <svg viewBox="0 0 120 120" width="120" height="120" role="img">
+                    <defs>
+                      <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%"  stop-color="#60a5ff"/>
+                        <stop offset="50%" stop-color="#3a8bff"/>
+                        <stop offset="100%" stop-color="#1d4ed8"/>
+                      </linearGradient>
+                    </defs>
+                    <circle cx="60" cy="60" r="44" fill="none" stroke="url(#lg)" stroke-width="6" opacity="0.35"/>
+                    <path class="arc arc--cw"  d="M60 30a30 30 0 0 1 0 60" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linecap="round"/>
+                    <path class="arc arc--ccw" d="M60 40a20 20 0 0 1 0 40" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linecap="round" opacity="0.8"/>
+                    <path class="arc arc--cw"  d="M60 50a10 10 0 0 1 0 20" fill="none" stroke="url(#lg)" stroke-width="8" stroke-linecap="round"/>
+                    <circle cx="60" cy="60" r="5" fill="url(#lg)"/>
+                  </svg>
+                </div>
+                <div class="logo-word">LeadSignal</div>
+                <div class="logo-shine" style="display:none"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="home-section">
+            <h3 class="home-h3">How it works</h3>
+            <div class="features">
+              <div class="feature"><h4>1. Search</h4><p>Choose a category and an area. We read from a live Supabase table of parsed Google Maps results.</p></div>
+              <div class="feature"><h4>2. Clean</h4><p>Duplicates removed, weird encodings fixed, phones normalized. Optional WhatsApp one-click.</p></div>
+              <div class="feature"><h4>3. Export</h4><p>Download a CSV for outreach or ads lookalikes. No spreadsheets gymnastics.</p></div>
+            </div>
+          </div>
+
+          <div class="home-section">
+            <h3 class="home-h3">Built for real use</h3>
+            <div class="usecases">
+              <div class="use"><h4>Local agencies</h4><ul><li>Find 200 salons in 3 minutes</li><li>WhatsApp-first outreach</li><li>Filter by city</li></ul></div>
+              <div class="use"><h4>SMB owners</h4><ul><li>Identify partners and suppliers</li><li>Check ratings and photos</li><li>Export contacts</li></ul></div>
+              <div class="use"><h4>Freelancers</h4><ul><li>Lead lists for gigs</li><li>Simple UI, no code</li><li>Free to start</li></ul></div>
+            </div>
+          </div>
+
+          <div class="home-section">
+            <h3 class="home-h3">FAQ</h3>
+            <div class="faq">
+              <div class="qa"><h4>Where is the data from?</h4><p>Parsed from public Google Maps listings, stored in a Supabase table you control.</p></div>
+              <div class="qa"><h4>Is it legal?</h4><p>We display publicly available business info. You decide how to use it within your local laws.</p></div>
+              <div class="qa"><h4>Can I export all results?</h4><p>Export per page now. Full export endpoint is on the roadmap.</p></div>
+              <div class="qa"><h4>Why do some records miss phones?</h4><p>Some listings don’t publish numbers. We still include address, site, photos and rating.</p></div>
+            </div>
+          </div>
+
+          <div class="footer">
+            <div>© <span id="year"></span> Lead Finder</div>
+            <div><a href="#" id="jumpSearch">Go to Search ⮕</a></div>
           </div>
         </div>
 
@@ -183,7 +319,7 @@
             <div id="pagination" class="pagination"></div>
           </section>
         </div>
-        <!-- sticky player-style pagination bar -->
+
         <div id="playerBar" class="playerbar" aria-label="Pagination">
           <div class="pb-wrap">
             <button id="pbPrev" class="pb-btn" aria-label="Previous page">⏮</button>
@@ -201,16 +337,16 @@
 
   <script>
     const stages=["Searching for leads","Adapting to the category","Collecting data","Cleaning the data","Finalizing"]
-    const state={items:[],page:1,pages:1,perPage:20,q:'',sort:'rating_desc',category:'',location:''}
+    const state={items:[],page:1,pages:1,perPage:20,q:"",sort:"rating_desc",category:"",location:""}
     const qs=id=>document.getElementById(id)
 
-    function showOverlay(b){qs('loading').classList.toggle('show',b)}
-    function setStage(t){qs('stageText').textContent=t}
+    function showOverlay(b){qs("loading").classList.toggle("show",b)}
+    function setStage(t){qs("stageText").textContent=t}
     function runStages(done){showOverlay(true);let i=0;setStage(stages[i]);const tick=()=>{i++;if(i<stages.length){setStage(stages[i]);setTimeout(tick,1100)}else{showOverlay(false);done()}};setTimeout(tick,1100)}
 
-    function sanitize(s){if(!s)return'';const d=document.createElement('div');d.textContent=String(s);return d.innerHTML}
-    function normalizeUrl(u){if(!u)return'';try{new URL(u);return u}catch{return 'https://'+u}}
-    function phoneDisplay(p){let s=String(p||'').trim();s=s.replace(/\s+/g,'').replace(/\.0$/,'');return s}
+    function sanitize(s){if(!s)return"";const d=document.createElement("div");d.textContent=String(s);return d.innerHTML}
+    function normalizeUrl(u){if(!u)return"";try{new URL(u);return u}catch{return "https://"+u}}
+    function phoneDisplay(p){let s=String(p||"").trim();s=s.replace(/\s+/g,"").replace(/\.0$/,'');return s}
 
     async function fetchResults(category,location,page,perPage){const params=new URLSearchParams({category,location,page,per_page:perPage});const res=await fetch('/search?'+params.toString());return await res.json()}
 
@@ -219,67 +355,15 @@
 
     function renderPagination(total,pages){const wrap=qs('pagination');wrap.innerHTML='';const mk=(t,p,a=false)=>{const b=document.createElement('button');b.className='pagebtn'+(a?' active':'');b.textContent=t;b.onclick=()=>{if(p===state.page)return;state.page=p;loadPage()};wrap.appendChild(b)};const max=7;let s=Math.max(1,state.page-3);let e=Math.min(pages,s+max-1);s=Math.max(1,e-max+1);if(state.page>1)mk('Prev',state.page-1);for(let i=s;i<=e;i++)mk(String(i),i,i===state.page);if(state.page<pages)mk('Next',state.page+1)}
 
-    function renderCards(items){
-      const wrap=qs('results');
-      wrap.innerHTML=items.map(renderCard).join('');
-      wrap.querySelectorAll('.card').forEach(card=>{
-        const slides=card.querySelectorAll('.slide');
-        const dots=card.querySelector('.dots');
-        const nav=card.querySelector('.navbtn');
-        if(slides.length>1){card.classList.add('multi');}else{if(dots) dots.remove(); if(nav) nav.remove();}
-        // Measure actions height to drive hover expansion and lift
-        const actions=card.querySelector('.actions');
-        if(actions){
-          const h=Math.max(actions.scrollHeight, 34); // at least one row
-          const lift=Math.min(26, Math.max(8, Math.round(h*0.35)));
-          card.style.setProperty('--act-h', (h+10)+ 'px');
-          card.style.setProperty('--lift', lift + 'px');
-        }
-      })
-    }
+    function renderCards(items){const wrap=qs('results');wrap.innerHTML=items.map(renderCard).join('');wrap.querySelectorAll('.card').forEach(card=>{const slides=card.querySelectorAll('.slide');const dots=card.querySelector('.dots');const nav=card.querySelector('.navbtn');if(slides.length>1){card.classList.add('multi');}else{if(dots) dots.remove(); if(nav) nav.remove();}const actions=card.querySelector('.actions');if(actions){const h=Math.max(actions.scrollHeight,34);const lift=Math.min(26,Math.max(8,Math.round(h*0.35)));card.style.setProperty('--act-h',(h+10)+'px');card.style.setProperty('--lift',lift+'px');}})}
 
-    function renderAll(meta){const filtered=applyFilter(state.items);const sorted=applySort(filtered);renderCards(sorted);qs('resultsSection').style.display='block';qs('toolbar').style.display='flex';qs('counts').textContent=`${meta.total} items • Page ${meta.page} of ${meta.pages}`;renderPagination(meta.total,meta.pages);updatePlayerBar(meta)}
+    function renderAll(meta){const filtered=applyFilter(state.items);const sorted=applySort(filtered);renderCards(sorted);qs('resultsSection').style.display='block';qs('toolbar').style.display='flex';qs('counts').textContent=`${meta.total} items \u00B7 Page ${meta.page} of ${meta.pages}`;renderPagination(meta.total,meta.pages);updatePlayerBar(meta)}
 
-    function renderCard(x){const phone=x.phone_e164||x.phone||'';const tel=phone?`tel:${encodeURI(phoneDisplay(phone))}`:'';const wa=phone?`https://wa.me/${encodeURIComponent(String(phone).replace(/[^\d]/g,''))}`:'';const site=normalizeUrl(x.website||x.website_fallback||'');const chips=[x.category,x.gmaps_primary_category].filter(Boolean).map(v=>`<span class="chip">${sanitize(v)}</span>`).join('');const stars=x.rating?`<span class="chip chip--rating">⭐ ${sanitize(x.rating)}</span>`:'';const photos=Array.isArray(x.photos)&&x.photos.length?x.photos:(x.main_photo_url?[x.main_photo_url]:[]);const slides=photos.map((u,i)=>`<img src="${sanitize(u)}" alt="" class="slide ${i===0?'active':''}"/>`).join('');const dots=photos.map((_,i)=>`<span class="dot ${i===0?'active':''}" data-idx="${i}"></span>`).join('');return`<article class="card"><div class="cover slides">${slides}</div><div class="navbtn">${photos.length>1?`<button data-role="prev">‹</button><button data-role="next">›</button>`:''}</div><div class="dots">${dots}</div><div class="card-body"><h3 class="title" dir="auto"><a href="${sanitize(x.profile_url||'#')}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:none">${sanitize(x.name||'')}</a></h3><div class="chips">${chips}${stars}</div><div class="meta" dir="auto">${sanitize(x.address_line||'')}</div><div class="actions">${phone?`<a class="btn btn--call" href="${tel}">Call</a>`:''}${phone?`<button class="btn" data-copy="${sanitize(phoneDisplay(phone))}">Copy</button>`:''}${phone?`<a class="btn btn--wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}${site?`<a class="btn btn--site" href="${sanitize(site)}" target="_blank" rel="noopener">Website</a>`:''}${(x.profile_url||'')?`<a class="btn btn--maps" href="${sanitize(x.profile_url)}" target="_blank" rel="noopener">Maps</a>`:''}</div></div></article>`}
-
-    // override with improved centered chips + clean arrows
-    function renderCard(x){
-      const phone=x.phone_e164||x.phone||'';
-      const tel=phone?`tel:${encodeURI(phoneDisplay(phone))}`:'';
-      const wa=phone?`https://wa.me/${encodeURIComponent(String(phone).replace(/[^\d]/g,''))}`:'';
-      const site=normalizeUrl(x.website||x.website_fallback||'');
-      const chips=[x.category,x.gmaps_primary_category]
-        .filter(Boolean)
-        .map(v=>`<span class="chip">${sanitize(v)}</span>`)
-        .join('');
-      const stars=x.rating
-        ? `<span class="chip chip--rating"><span class="star">★</span><span class="val">${sanitize(x.rating)}</span></span>`
-        : '';
-      const photos=Array.isArray(x.photos)&&x.photos.length?x.photos:(x.main_photo_url?[x.main_photo_url]:[]);
-      const slides=photos.map((u,i)=>`<img src="${sanitize(u)}" alt="" class="slide ${i===0?'active':''}"/>`).join('');
-      const dots=photos.map((_,i)=>`<span class="dot ${i===0?'active':''}" data-idx="${i}"></span>`).join('');
-      return `<article class="card">
-        <div class="cover slides">${slides}</div>
-        <div class="navbtn">${photos.length>1?`<button data-role="prev"></button><button data-role="next"></button>`:''}</div>
-        <div class="dots">${dots}</div>
-        <div class="card-body">
-          <h3 class="title" dir="auto"><a href="${sanitize(x.profile_url||'#')}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:none">${sanitize(x.name||'')}</a></h3>
-          <div class="chips">${chips}${stars}</div>
-          <div class="meta" dir="auto">${sanitize(x.address_line||'')}</div>
-          <div class="actions">
-            ${phone?`<a class="btn btn--call" href="${tel}">Call</a>`:''}
-            ${phone?`<button class="btn" data-copy="${sanitize(phoneDisplay(phone))}">Copy</button>`:''}
-            ${phone?`<a class="btn btn--wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}
-            ${site?`<a class="btn btn--site" href="${sanitize(site)}" target="_blank" rel="noopener">Website</a>`:''}
-            ${(x.profile_url||'')?`<a class="btn btn--maps" href="${sanitize(x.profile_url)}" target="_blank" rel="noopener">Maps</a>`:''}
-          </div>
-        </div>
-      </article>`
-    }
+    function renderCard(x){const phone=x.phone_e164||x.phone||'';const tel=phone?`tel:${encodeURI(phoneDisplay(phone))}`:'';const wa=phone?`https://wa.me/${encodeURIComponent(String(phone).replace(/[^\d]/g,''))}`:'';const site=normalizeUrl(x.website||x.website_fallback||'');const chips=[x.category,x.gmaps_primary_category].filter(Boolean).map(v=>`<span class="chip">${sanitize(v)}</span>`).join('');const stars=x.rating?`<span class="chip chip--rating"><span class=\"star\">&#9733;</span><span class="val">${sanitize(x.rating)}</span></span>`:'';const photos=Array.isArray(x.photos)&&x.photos.length?x.photos:(x.main_photo_url?[x.main_photo_url]:[]);const slides=photos.map((u,i)=>`<img src="${sanitize(u)}" alt=\"\" loading=\"lazy\" class=\"slide ${i===0?'active':''}"/>`).join('');const dots=photos.map((_,i)=>`<span class="dot ${i===0?'active':''}" data-idx="${i}"></span>`).join('');return `<article class="card"><div class="cover slides">${slides}</div><div class="navbtn">${photos.length>1?`<button data-role="prev"></button><button data-role="next"></button>`:''}</div><div class="dots">${dots}</div><div class="card-body"><h3 class="title" dir="auto"><a href="${sanitize(x.profile_url||'#')}" target="_blank" rel="noopener noreferrer" style="color:#fff;text-decoration:none">${sanitize(x.name||'')}</a></h3><div class="chips">${chips}${stars}</div><div class="meta" dir="auto">${sanitize(x.address_line||'')}</div><div class="actions">${phone?`<a class="btn btn--call" href="${tel}">Call</a>`:''}${phone?`<button class="btn" data-copy="${sanitize(phoneDisplay(phone))}">Copy</button>`:''}${phone?`<a class="btn btn--wa" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>`:''}${site?`<a class="btn btn--site" href="${sanitize(site)}" target="_blank" rel="noopener">Website</a>`:''}${(x.profile_url||'')?`<a class="btn btn--maps" href="${sanitize(x.profile_url)}" target="_blank" rel="noopener">Maps</a>`:''}</div></div></article>`}
 
     function debounce(fn,wait=220){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}}
 
-    function showToast(msg){const t=qs('toast');qs('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1400)}
+    function showToast(msg){const t=qs('toast');qs('toastMsg').textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1100)}
 
     document.addEventListener('click',e=>{const t=e.target.closest('[data-copy]');if(!t)return;const v=t.getAttribute('data-copy')||'';navigator.clipboard.writeText(v).then(()=>showToast('Copied phone')).catch(()=>showToast('Copy failed'))})
 
@@ -289,57 +373,93 @@
 
     async function loadPage(){runStages(async()=>{const data=await fetchResults(state.category,state.location,state.page,state.perPage);state.items=data.items;state.pages=data.pages;renderAll({total:data.total,page:data.page,pages:data.pages});window.scrollTo({top:document.body.offsetTop})})}
 
-    function updatePlayerBar(meta){const bar=document.getElementById('playerBar');if(!bar) return;const p=qs('pbPage'), P=qs('pbPages'), r=qs('pbRange');const hasPages = (meta && meta.pages && meta.pages>1);bar.style.display = hasPages ? 'block' : 'none';if(!hasPages) return; p.textContent=String(meta.page);P.textContent=String(meta.pages);r.max=String(Math.max(1,meta.pages));r.value=String(Math.min(meta.pages, Math.max(1,state.page)))}
+    function updatePlayerBar(meta){const bar=document.getElementById('playerBar');if(!bar) return;const p=qs('pbPage'), P=qs('pbPages'), r=qs('pbRange');const hasPages=(meta&&meta.pages&&meta.pages>1);bar.style.display=hasPages?'block':'none';if(!hasPages) return;p.textContent=String(meta.page);P.textContent=String(meta.pages);r.max=String(Math.max(1,meta.pages));r.value=String(Math.min(meta.pages,Math.max(1,state.page)))}
 
     function hookPlayerBar(){const prev=qs('pbPrev'), next=qs('pbNext'), r=qs('pbRange');if(prev)prev.onclick=()=>{if(state.page>1){state.page--;loadPage()}};if(next)next.onclick=()=>{if(state.page<state.pages){state.page++;loadPage()}};if(r)r.oninput=(e)=>{const v=parseInt(e.target.value||'1',10);if(v!==state.page){state.page=v;loadPage()}}}
 
     function activatePanel(id){['homePanel','searchPanel'].forEach(pid=>qs(pid).classList.toggle('hidden',pid!==id));document.querySelectorAll('.nav .item').forEach(el=>{el.classList.toggle('active',el.dataset.target===id)});qs('pageTitle').textContent=id==='homePanel'?'Welcome':'Discover Leads';if(id==='searchPanel'){const c=qs('category');if(c)c.focus()}}
 
-    function init(){
-      hookPlayerBar();
-      updatePlayerBar({pages:0});
-      const form=qs('searchForm');
-      const category=qs('category');
-      const location=qs('location');
-      const perPage=qs('perPage');
-      const sortBy=qs('sortBy');
-      const exportBtn=qs('exportBtn');
-      const themeBtn=qs('themeBtn');
-      const saved={category:localStorage.getItem('lf.category')||'',location:localStorage.getItem('lf.location')||'',perPage:localStorage.getItem('lf.perPage')||'',sort:localStorage.getItem('lf.sort')||''};
-      const setIfOptionExists=(sel,val)=>{if(!val||!sel||!sel.options)return;for(const o of sel.options){if(o.value===val){sel.value=val;break}}};
-      if(saved.category) category.value = saved.category;
-      setIfOptionExists(location,saved.location);
-      if(saved.perPage)perPage.value=saved.perPage;
-      if(saved.sort){sortBy.value=saved.sort;state.sort=saved.sort}
-      // Normalize to known category if typed
-      const normalizeCategory=(val)=>{
-        const opts=Array.from(document.querySelectorAll('#categoryList option')).map(o=>o.value);
-        const exact=opts.find(x=>x.toLowerCase()===String(val||'').trim().toLowerCase());
-        return exact || String(val||'').trim();
-      }
-      form.addEventListener('submit',e=>{e.preventDefault();state.category=normalizeCategory(category.value);state.location=location.value;state.perPage=parseInt(perPage.value||20);state.page=1;localStorage.setItem('lf.category',state.category);localStorage.setItem('lf.location',state.location);localStorage.setItem('lf.perPage',String(state.perPage));activatePanel('searchPanel');loadPage()});
-      sortBy.addEventListener('change',()=>{state.sort=sortBy.value;localStorage.setItem('lf.sort',state.sort);renderAll({total:state.items.length,page:state.page,pages:state.pages})});
-      exportBtn.addEventListener('click', () => { const lines=[["name","category","address","phone","website","rating"],...applySort(applyFilter(state.items)).map(x=>[x.name||'',x.category||'',x.address_line||'',x.phone_e164||'',x.website||x.website_fallback||'',x.rating||''])]; const csv=lines.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n'); const bom="\uFEFF"; const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download="leads_page.csv"; a.click(); URL.revokeObjectURL(url); });
-      document.getElementById('nav').addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;activatePanel(it.dataset.target)});
-      document.getElementById('startBtn').addEventListener('click',()=>activatePanel('searchPanel'))
-      // Recalculate actions height on resize so hover space adapts
-      const recalc=()=>{document.querySelectorAll('#results .card').forEach(card=>{const actions=card.querySelector('.actions');if(actions){const h=Math.max(actions.scrollHeight,34);const lift=Math.min(26,Math.max(8,Math.round(h*0.35)));card.style.setProperty('--act-h',(h+10)+'px');card.style.setProperty('--lift',lift+'px')}})}
-      window.addEventListener('resize', debounce(recalc,180));
+    async function populateHomePreview(){
+      const art=qs('homePreview');
+      if(!art) return;
+      if(art.classList.contains('art--logo')) return; // keep the logo in place
+      try{
+        const firstLoc=(document.querySelector('#location option')||{}).value||'';
+        const firstCat=(document.querySelector('#categoryList option')||{}).value||'';
+        if(!firstLoc||!firstCat){art.style.backgroundImage='';return;}
+        const sample=await fetchResults(firstCat,firstLoc,1,1);
+        const items=sample.items||[];
+        const photo=(items[0]&&((items[0].main_photo_url)||((Array.isArray(items[0].photos)&&items[0].photos[0])||'')))||'';
+        if(photo){art.style.backgroundImage=`url('${photo}')`;}
+        if(sample.total){qs('mLeads').textContent=sample.total+'+';}
+      }catch(e){}
     }
 
+    function init(){hookPlayerBar();updatePlayerBar({pages:0});const form=qs('searchForm');const category=qs('category');const location=qs('location');const perPage=qs('perPage');const sortBy=qs('sortBy');const exportBtn=qs('exportBtn');const saved={category:localStorage.getItem('lf.category')||'',location:localStorage.getItem('lf.location')||'',perPage:localStorage.getItem('lf.perPage')||'',sort:localStorage.getItem('lf.sort')||''};const setIfOptionExists=(sel,val)=>{if(!val||!sel||!sel.options)return;for(const o of sel.options){if(o.value===val){sel.value=val;break}}};if(saved.category)category.value=saved.category;setIfOptionExists(location,saved.location);if(saved.perPage)perPage.value=saved.perPage;if(saved.sort){sortBy.value=saved.sort;state.sort=saved.sort}const normalizeCategory=(val)=>{const opts=Array.from(document.querySelectorAll('#categoryList option')).map(o=>o.value);const exact=opts.find(x=>x.toLowerCase()===String(val||'').trim().toLowerCase());return exact||String(val||'').trim()};form.addEventListener('submit',e=>{e.preventDefault();state.category=normalizeCategory(category.value);state.location=location.value;state.perPage=parseInt(perPage.value||20);state.page=1;localStorage.setItem('lf.category',state.category);localStorage.setItem('lf.location',state.location);localStorage.setItem('lf.perPage',String(state.perPage));activatePanel('searchPanel');loadPage()});sortBy.addEventListener('change',()=>{state.sort=sortBy.value;localStorage.setItem('lf.sort',state.sort);renderAll({total:state.items.length,page:state.page,pages:state.pages})});exportBtn.addEventListener('click',()=>{const lines=[["name","category","address","phone","website","rating"],...applySort(applyFilter(state.items)).map(x=>[x.name||'',x.category||'',x.address_line||'',x.phone_e164||'',x.website||x.website_fallback||'',x.rating||''])];const csv=lines.map(r=>r.map(v=>`"${String(v).replaceAll('"','""')}"`).join(',')).join('\n');const bom="\uFEFF";const blob=new Blob([bom+csv],{type:"text/csv;charset=utf-8;"});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download="leads_page.csv";a.click();URL.revokeObjectURL(url);});document.getElementById('nav').addEventListener('click',e=>{const it=e.target.closest('.item');if(!it)return;activatePanel(it.dataset.target)});document.getElementById('startBtn').addEventListener('click',()=>activatePanel('searchPanel'));document.getElementById('seeSampleBtn').addEventListener('click',()=>{activatePanel('homePanel');populateHomePreview()});document.getElementById('jumpSearch').addEventListener('click',(e)=>{e.preventDefault();activatePanel('searchPanel')});qs('year').textContent=(new Date()).getFullYear();populateHomePreview();}
+
+    (function(){ const eb=document.querySelector('.hero .eyebrow'); if(eb && !eb.querySelector('.zap')){ eb.innerHTML='<span class="zap" aria-hidden="true">&#9889;</span> Instant lead lists &bull; No scraping required'; } })();
+
+    // Tiny tilt + moving shine for hero logo mode
+    (function(){
+      const art=document.getElementById('homePreview');
+      if(!art || !art.classList.contains('art--logo')) return;
+      const box=art.querySelector('.logo3d');
+      const shine=art.querySelector('.logo-shine');
+      let raf=0;
+      function tilt(mx,my){
+        const r=box.getBoundingClientRect();
+        const cx=r.left+r.width/2; const cy=r.top+r.height/2;
+        const dx=(mx-cx)/(r.width/2); const dy=(my-cy)/(r.height/2);
+        const rotX=Math.max(-14,Math.min(14,14*dy));
+        const rotY=Math.max(-22,Math.min(22,-22*dx));
+        box.style.transform=`rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(0)`;
+        const sx=((mx-r.left)/r.width)*100; const sy=((my-r.top)/r.height)*100;
+        if(shine){
+          shine.style.setProperty('--sx',sx+'%');
+          shine.style.setProperty('--sy',sy+'%');
+        }
+      }
+      function onMove(e){ const p=e.touches?e.touches[0]:e; cancelAnimationFrame(raf); raf=requestAnimationFrame(()=>tilt(p.clientX,p.clientY)); }
+      function reset(){ box.style.transform='rotateX(0deg) rotateY(0deg)'; }
+      box.addEventListener('mousemove',onMove,{passive:true});
+      box.addEventListener('touchmove',onMove,{passive:true});
+      box.addEventListener('mouseleave',reset); box.addEventListener('touchend',reset);
+    })();
     init()
 
-    // simple autoplay for cards with multiple images, pause on hover
-    setInterval(()=>{
-      document.querySelectorAll('.card.multi').forEach(card=>{
-        if(card.matches(':hover')) return;
-        const slides=card.querySelectorAll('.slide'); if(slides.length<2) return;
-        let idx=0; slides.forEach((s,i)=>{ if(s.classList.contains('active')) idx=i });
-        idx=(idx+1)%slides.length;
-        slides.forEach((s,i)=>s.classList.toggle('active', i===idx));
-        const dots=card.querySelectorAll('.dots .dot'); dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
-      })
-    }, 4200)
+    // stagger rows for .features, .usecases, .faq then reveal on scroll
+    (function(){
+      const groups=document.querySelectorAll('.features,.usecases,.faq');
+      const setDelays=(grid)=>{
+        const styles=getComputedStyle(grid);
+        const cols=(styles.gridTemplateColumns||'').split(' ').filter(Boolean).length||1;
+        [...grid.children].forEach((el,i)=>{
+          const row=Math.floor(i/cols);
+          const col=i%cols;
+          el.style.setProperty('--d', (row*180 + col*40) + 'ms');
+        });
+      };
+      groups.forEach(g=>{g.classList.add('reveal-stagger'); setDelays(g)});
+      const io=new IntersectionObserver((entries)=>{
+        entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-in'); io.unobserve(e.target) } });
+      },{rootMargin:'-10% 0px -10% 0px', threshold:0.12});
+      const revealables=document.querySelectorAll('.reveal-stagger');
+      const inView=(el)=>{ const r=el.getBoundingClientRect(); const vh=window.innerHeight||document.documentElement.clientHeight; return r.top < vh*0.9 && r.bottom > 0 };
+      revealables.forEach(el=>{ if(inView(el)){ el.classList.add('is-in') } else { io.observe(el) } });
+      window.addEventListener('resize', debounce(()=>{
+        document.querySelectorAll('.reveal-stagger').forEach(setDelays);
+        document.querySelectorAll('.reveal-stagger:not(.is-in)').forEach(el=>{
+          if(inView(el)){ el.classList.add('is-in'); io.unobserve(el) }
+        })
+      },200));
+    })();
+
+    setInterval(()=>{document.querySelectorAll('.card.multi').forEach(card=>{if(card.matches(':hover'))return;const slides=card.querySelectorAll('.slide');if(slides.length<2)return;let idx=0;slides.forEach((s,i)=>{if(s.classList.contains('active'))idx=i});idx=(idx+1)%slides.length;slides.forEach((s,i)=>s.classList.toggle('active',i===idx));const dots=card.querySelectorAll('.dots .dot');dots.forEach((d,i)=>d.classList.toggle('active',i===idx));})},4200)
   </script>
 </body>
 </html>
+
+
+
+
+
