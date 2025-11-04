@@ -4,13 +4,13 @@ import argparse, csv, re, unicodedata, os, sys, json
 from datetime import datetime
 
 CURRENCY_PATTERNS = [
-    r"(?:EGP|ج(?:\.|\s*)م|LE|L\.E\.|E\s*P|جنيه)\s*\d+[\d\s,\.]*\+?",
-    r"\d+[\d\s,\.]*\s*(?:EGP|ج(?:\.|\s*)م|LE|L\.E\.|E\s*P)\+?",
+    r"(?:EGP|ج(?:\.\s*)م|LE|L\.E\.|E\s*P|جنيه)\s*\d+[\d\s,\.]*\+?",
+    r"\d+[\d\s,\.]*\s*(?:EGP|ج(?:\.\s*)م|LE|L\.E\.|E\s*P)\+?",
     r"(?:min(?:imum)?|delivery|charge|service)\s*[:=]?\s*\d+[\d\s,\.]*",
 ]
 PRICE_RE = re.compile("|".join(CURRENCY_PATTERNS), re.IGNORECASE)
 NUM_RE = re.compile(r"\d+(?:[\.,]\d+)?")
-EGP_NUM_RE = re.compile(r"(?:(?:EGP|LE|L\.E\.|E\s*P|ج(?:\.|\s*)م)\s*)?(\d+[\d,\.]*)\s*(\+?)", re.IGNORECASE)
+EGP_NUM_RE = re.compile(r"(?:(?:EGP|LE|L\.E\.|E\s*P|ج(?:\.\s*)م)\s*)?(\d+[\d,\.]*)\s*(\+?)", re.IGNORECASE)
 ADDR_SPLIT_RE = re.compile(r"\s*[•·]\s*|")
 NBSP_REPL = {"\u00A0": " ", "\u202F": " "}
 
@@ -198,22 +198,17 @@ def fix_reviews(x):
     return m.group(0) if m else ""
 
 
-### --------- ONLY EDITED PART ---------
 def dedupe_key(row):
     u = nfc(row.get("profile_url", "")).lower()
     if u:
         return ("u", u)
-
     n = nfc(row.get("name", "")).lower()
     if n:
         return ("n", n)
-
     a = nfc(row.get("address_line", "")).lower()
     if n and a:
         return ("na", n + "|" + a)
-
     return ("row", json.dumps(row, ensure_ascii=False))
-### --------- END OF EDIT ---------
 
 
 def normalize_photo_identity(u):
@@ -301,7 +296,6 @@ def process(in_path, out_path, drop_empty_name=False):
         row["address_clean_source"] = addr_src
         if "photo_urls" in row:
             row["photo_urls"] = choose_single_unique_photo(row.get("photo_urls", ""), global_photos_seen)
-
         k = dedupe_key(row)
         if k in seen:
             continue
@@ -309,7 +303,6 @@ def process(in_path, out_path, drop_empty_name=False):
         if drop_empty_name and not row.get("name"):
             continue
         cleaned.append(row)
-
     write_rows(out_path, fieldset, cleaned)
 
 
@@ -319,8 +312,7 @@ def main():
     ap.add_argument("--out", dest="out", required=True)
     ap.add_argument("--drop-empty-name", action="store_true")
     args = ap.parse_args()
-    process(args.inp, args.out, drop_empty_name=args.drop_empty-name)
-
+    process(args.inp, args.out, drop_empty_name=args.drop_empty_name)
 
 if __name__ == "__main__":
     main()
