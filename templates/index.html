@@ -342,11 +342,11 @@
             <div>
               <label>Category</label>
               <input id="category" list="categoryList" placeholder="Type or choose" autocomplete="off" />
-              <datalist id="categoryList"><option value="Clinics"></option></datalist>
+              <datalist id="categoryList">{% for c in categories %}<option value="{{ c }}"></option>{% endfor %}</datalist>
             </div>
             <div>
               <label>Area</label>
-              <select id="location"><option value="Cairo, Egypt">Cairo, Egypt</option></select>
+              <select id="location">{% for loc in locations %}<option value="{{ loc }}">{{ loc }}</option>{% endfor %}</select>
             </div>
             <div>
               <label>Per page</label>
