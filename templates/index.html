@@ -346,7 +346,8 @@
             </div>
             <div>
               <label>Area</label>
-              <select id="location">{% for loc in locations %}<option value="{{ loc }}">{{ loc }}</option>{% endfor %}</select>
+              <input id="location" list="locationList" placeholder="Type or choose" autocomplete="off" />
+              <datalist id="locationList">{% for loc in locations %}<option value="{{ loc }}"></option>{% endfor %}</datalist>
             </div>
             <div>
               <label>Per page</label>
@@ -394,39 +395,97 @@
     const state={items:[],page:1,pages:1,perPage:20,q:"",sort:"rating_desc",category:"",location:""}
     const qs=id=>document.getElementById(id)
 
-    function attachCategoryCombo(){
-      const input = qs('category');
-      const list = document.getElementById('categoryList');
+    function attachCombo(inputId, listId){
+      const input = qs(inputId);
+      const list = document.getElementById(listId);
       if(!input || !list) return;
+    
       const options = Array.from(list.querySelectorAll('option')).map(o=>o.value).filter(Boolean);
       const menu = document.createElement('div');
       menu.className = 'combo-menu';
       menu.style.display = 'none';
       menu.setAttribute('role','listbox');
       document.body.appendChild(menu);
+    
       let visible = [];
       let activeIndex = -1;
+    
       const positionMenu = () => {
         const r = input.getBoundingClientRect();
         menu.style.top = (window.scrollY + r.bottom + 6) + 'px';
         menu.style.left = (window.scrollX + r.left) + 'px';
         menu.style.minWidth = Math.max(240, Math.round(r.width)) + 'px';
       };
+    
       const hideMenu = () => { menu.style.display='none'; activeIndex = -1; };
       const showMenu = () => { if(!visible.length){ hideMenu(); return; } positionMenu(); menu.style.display='block'; };
-      const setActive = (idx) => { const items = menu.querySelectorAll('.combo-item'); items.forEach((el,i)=> el.classList.toggle('active', i===idx)); activeIndex = idx; ensureVisible(); };
-      const ensureVisible = () => { const a = menu.querySelector('.combo-item.active'); if(!a) return; const ar = a.getBoundingClientRect(); const mr = menu.getBoundingClientRect(); if(ar.top < mr.top) menu.scrollTop += ar.top - mr.top - 6; if(ar.bottom > mr.bottom) menu.scrollTop += ar.bottom - mr.bottom + 6; };
-      const choose = (idx) => { if(idx < 0 || idx >= visible.length) return; input.value = visible[idx]; hideMenu(); input.dispatchEvent(new Event('change', { bubbles: true })); };
-      const render = (q) => { const needle = String(q||'').trim().toLowerCase(); visible = options.filter(o => o.toLowerCase().includes(needle)).slice(0, 60); menu.innerHTML = ''; if(!visible.length){ const empty = document.createElement('div'); empty.className = 'combo-empty'; empty.textContent = 'No matches'; menu.appendChild(empty); return; } visible.forEach((val, idx) => { const item = document.createElement('div'); item.className = 'combo-item'; item.textContent = val; item.setAttribute('role','option'); item.addEventListener('mouseenter', () => setActive(idx)); item.addEventListener('mousedown', (e) => { e.preventDefault(); choose(idx); }); menu.appendChild(item); }); activeIndex = -1; };
+    
+      const setActive = (idx) => {
+        const items = menu.querySelectorAll('.combo-item');
+        items.forEach((el,i)=> el.classList.toggle('active', i===idx));
+        activeIndex = idx;
+        const a = menu.querySelector('.combo-item.active');
+        if(!a) return;
+        const ar = a.getBoundingClientRect();
+        const mr = menu.getBoundingClientRect();
+        if(ar.top < mr.top) menu.scrollTop += ar.top - mr.top - 6;
+        if(ar.bottom > mr.bottom) menu.scrollTop += ar.bottom - mr.bottom + 6;
+      };
+    
+      const choose = (idx) => {
+        if(idx < 0 || idx >= visible.length) return;
+        input.value = visible[idx];
+        hideMenu();
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+    
+      const render = (q) => {
+        const needle = String(q||'').trim().toLowerCase();
+        visible = options.filter(o => o.toLowerCase().includes(needle)).slice(0, 60);
+        menu.innerHTML = '';
+        if(!visible.length){
+          const empty = document.createElement('div');
+          empty.className = 'combo-empty';
+          empty.textContent = 'No matches';
+          menu.appendChild(empty);
+          return;
+        }
+        visible.forEach((val, idx) => {
+          const item = document.createElement('div');
+          item.className = 'combo-item';
+          item.textContent = val;
+          item.setAttribute('role','option');
+          item.addEventListener('mouseenter', () => setActive(idx));
+          item.addEventListener('mousedown', (e) => { e.preventDefault(); choose(idx); });
+          menu.appendChild(item);
+        });
+        activeIndex = -1;
+      };
+    
       input.addEventListener('focus', () => { render(input.value); showMenu(); });
       input.addEventListener('input', () => { render(input.value); showMenu(); });
-      input.addEventListener('keydown', (e) => { if(menu.style.display !== 'block') return; if(e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, visible.length - 1)); } else if(e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); } else if(e.key === 'Enter') { if(activeIndex>=0){ e.preventDefault(); choose(activeIndex); } } else if(e.key === 'Escape') { hideMenu(); } });
-      document.addEventListener('mousedown', (e) => { if(e.target === input || menu.contains(e.target)) return; hideMenu(); });
+      input.addEventListener('keydown', (e) => {
+        if(menu.style.display !== 'block') return;
+        if(e.key === 'ArrowDown') { e.preventDefault(); setActive(Math.min(activeIndex + 1, visible.length - 1)); }
+        else if(e.key === 'ArrowUp') { e.preventDefault(); setActive(Math.max(activeIndex - 1, 0)); }
+        else if(e.key === 'Enter') { if(activeIndex>=0){ e.preventDefault(); choose(activeIndex); } }
+        else if(e.key === 'Escape') { hideMenu(); }
+      });
+    
+      document.addEventListener('mousedown', (e) => {
+        if(e.target === input || menu.contains(e.target)) return;
+        hideMenu();
+      });
       window.addEventListener('scroll', positionMenu, true);
       window.addEventListener('resize', positionMenu);
+    
       input.setAttribute('data-list-id', list.id);
       input.removeAttribute('list');
     }
+    
+    function attachCategoryCombo(){ attachCombo('category','categoryList'); }
+    function attachLocationCombo(){ attachCombo('location','locationList'); }
+
 
     function showOverlay(b){qs("loading").classList.toggle("show",b)}
     function setStage(t){qs("stageText").textContent=t}
@@ -489,7 +548,7 @@
       if(!art) return;
       if(art.classList.contains('art--logo')) return;
       try{
-        const firstLoc=(document.querySelector('#location option')||{}).value||'';
+        const firstLoc=(document.querySelector('#locationList option')||{}).value||'';
         const firstCat=(document.querySelector('#categoryList option')||{}).value||'';
         if(!firstLoc||!firstCat){art.style.backgroundImage='';return;}
         const sample=await fetchResults(firstCat,firstLoc,1,1);
@@ -510,18 +569,19 @@
       const sortBy=qs('sortBy');
       const exportBtn=qs('exportBtn');
       const saved={category:localStorage.getItem('lf.category')||'',location:localStorage.getItem('lf.location')||'',perPage:localStorage.getItem('lf.perPage')||'',sort:localStorage.getItem('lf.sort')||''};
-      const setIfOptionExists=(sel,val)=>{if(!val||!sel||!sel.options)return;for(const o of sel.options){if(o.value===val){sel.value=val;break}}};
-      if(saved.category)category.value=saved.category;
-      setIfOptionExists(location,saved.location);
-      if(saved.perPage)perPage.value=saved.perPage;
-      if(saved.sort){sortBy.value=saved.sort;state.sort=saved.sort}
+      if(saved.category) category.value = saved.category;
+      if(saved.location) qs('location').value = saved.location;
+      if(saved.perPage) perPage.value = saved.perPage;
+      if(saved.sort){ sortBy.value = saved.sort; state.sort = saved.sort }
       attachCategoryCombo();
+      attachLocationCombo();
       const normalizeCategory=(val)=>{const opts=Array.from(document.querySelectorAll('#categoryList option')).map(o=>o.value);const exact=opts.find(x=>x.toLowerCase()===String(val||'').trim().toLowerCase());return exact||String(val||'').trim()};
+      const normalizeLocation=(val)=>{const opts=Array.from(document.querySelectorAll('#locationList option')).map(o=>o.value);const exact=opts.find(x=>x.toLowerCase()===String(val||'').trim().toLowerCase());return exact||String(val||'').trim()};
       form.addEventListener('submit',e=>{
         e.preventDefault();
         const cm=document.querySelector('.combo-menu'); if(cm) cm.style.display='none';
         state.category=normalizeCategory(category.value);
-        state.location=location.value;
+        state.location=normalizeLocation(location.value);
         state.perPage=parseInt(perPage.value||20);
         state.page=1;
         localStorage.setItem('lf.category',state.category);
