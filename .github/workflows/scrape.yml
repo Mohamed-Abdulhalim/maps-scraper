@@ -57,6 +57,7 @@ jobs:
 
           mapfile -t cities <<'EOF'
           # --- Egypt (governorate capitals / major cities) ---
+          Baghdad, Iraq
           Cairo, Egypt
           Alexandria, Egypt
           Giza, Egypt
