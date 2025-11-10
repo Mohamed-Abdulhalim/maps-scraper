@@ -1,8 +1,7 @@
 selenium==4.24.0
 undetected-chromedriver==3.5.5
-supabase==2.6.0
+supabase==2.7.0
 python-dotenv==1.0.1
 flask==3.0.3
 gunicorn==22.0.0
 pandas==2.2.3
-postgrest-py>=0.15.0
