@@ -14,17 +14,20 @@ sb = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 
 
 def _distinct(col):
-    res = sb.table(LEADS_TABLE).select(col).execute()
+    rows = (
+        sb.table(LEADS_TABLE)
+          .select(col, distinct=True)
+          .not_.is_(col, None)
+          .order(col)
+          .execute()
+          .data
+        or []
+    )
     vals = []
-    for r in res.data or []:
-        v = r.get(col)
-        if v is None:
-            continue
-        s = str(v).strip()
-        if not s:
-            continue
-        vals.append(s)
-    vals = sorted(list(dict.fromkeys(vals)))
+    for r in rows:
+        s = str(r.get(col, "")).strip()
+        if s:
+            vals.append(s)
     return vals
 
 
