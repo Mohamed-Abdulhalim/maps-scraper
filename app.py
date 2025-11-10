@@ -16,7 +16,8 @@ sb = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 def _distinct(col):
     rows = (
         sb.table(LEADS_TABLE)
-          .select(col, distinct=True)
+          .select(col)
+          .distinct()
           .not_.is_(col, None)
           .order(col)
           .execute()
@@ -29,7 +30,6 @@ def _distinct(col):
         if s:
             vals.append(s)
     return vals
-
 
 def unique_categories():
     return _distinct("category")
