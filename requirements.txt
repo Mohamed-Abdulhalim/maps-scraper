@@ -5,4 +5,4 @@ python-dotenv==1.0.1
 flask==3.0.3
 gunicorn==22.0.0
 pandas==2.2.3
-postgrest>=0.14.0
+postgrest-py>=0.15.0
