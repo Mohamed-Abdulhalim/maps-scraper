@@ -43,7 +43,6 @@ def unique_locations():
 
 @app.get("/")
 def index():
-    # Pass categories/locations for the Jinja loops in index.html
     return render_template(
         "index.html",
         categories=unique_categories(),
@@ -65,13 +64,13 @@ def meta():
 def search():
     category = request.args.get("category", type=str)
     location = request.args.get("location", type=str)
+    page = request.args.get("page", default=1, type=int)
+    if page < 1:
+        page = 1
+    per_page = 100
+    offset = (page - 1) * per_page
 
-    # UI "results" dropdown → per_page
-    per_page = request.args.get("per_page", default=50, type=int)
-    # Clamp, so no one asks for 10k rows and kills the DB
-    per_page = max(10, min(per_page, 200))
-
-    q = sb.table(LEADS_TABLE).select("*")
+    q = sb.table(LEADS_TABLE).select("*", count="exact")
 
     if category:
         q = q.eq("category", category)
@@ -79,15 +78,15 @@ def search():
     if location:
         loc = location.strip()
         if loc:
-            # IMPORTANT: no leading % to avoid full table scan
             q = q.ilike("query_location", f"{loc}%")
 
-    q = q.limit(per_page)
+    q = q.range(offset, offset + per_page - 1)
 
     res = q.execute()
+    rows = res.data or []
+    total = res.count or len(rows)
 
     items = []
-    rows = res.data or []
     for row in rows:
         row = {k: ("" if v is None else v) for k, v in row.items()}
 
@@ -108,12 +107,18 @@ def search():
 
         items.append(row)
 
-    return jsonify({"items": items})
+    return jsonify(
+        {
+            "items": items,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+        }
+    )
 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
 
 
 
