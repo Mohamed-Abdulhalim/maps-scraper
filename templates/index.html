@@ -304,9 +304,20 @@ const navHome=document.getElementById('nav-home');
 const navSearch=document.getElementById('nav-search');
 const ctaStart=document.getElementById('cta-start');
 const navToggle=document.getElementById('nav-toggle');
-function showHome(){panelHome.hidden=false;panelSearch.hidden=true;navHome.setAttribute('aria-current','page');navSearch.removeAttribute('aria-current');}
-function showSearch(){panelHome.hidden=true;panelSearch.hidden=false;navSearch.setAttribute('aria-current','page');navHome.removeAttribute('aria-current');}
-function showSearch(){panelHome.hidden=true;panelSearch.hidden=false;navSearch.setAttribute('aria-current','page');navHome.removeAttribute('aria-current')}
+
+function showHome(){
+  panelHome.hidden=false;
+  panelSearch.hidden=true;
+  navHome.setAttribute('aria-current','page');
+  navSearch.removeAttribute('aria-current');
+}
+
+function showSearch(){
+  panelHome.hidden=true;
+  panelSearch.hidden=false;
+  navSearch.setAttribute('aria-current','page');
+  navHome.removeAttribute('aria-current');
+}
 navHome.addEventListener('click',showHome);
 navSearch.addEventListener('click',showSearch);
 ctaStart.addEventListener('click',e=>{e.preventDefault();showSearch();document.getElementById('category').focus()});
@@ -488,17 +499,22 @@ function renderResult(item){
     img.src=item.main_photo_url;
   }else{
     img=document.createElement('div');
-    img.className='result-thumb result-thumb--empty';}
-  const main=document.createElement('div');
+    img.className='result-thumb result-thumb--empty';
+  }
+
   const main=document.createElement('div');
   main.className='result-main';
+
   const title=document.createElement('div');
   title.className='result-row';
+
   const name=document.createElement('div');
   name.style.fontWeight='800';
   name.textContent=item.name||'Unknown';
+
   const chips=document.createElement('div');
   chips.className='result-row';
+
   if(item.category){
     const b=document.createElement('span');
     b.className='badge';
@@ -523,30 +539,37 @@ function renderResult(item){
     b.textContent=item.address_line;
     chips.appendChild(b);
   }
+
   const actions=document.createElement('div');
   actions.className='actions';
+
   const phoneVal=item.phone_e164||item.phone;
   if(phoneVal){
     actions.appendChild(actionBtn('<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 5.18 2 2 0 0 1 4.06 3h3a2 2 0 0 1 2 1.72c.12.89.33 1.76.62 2.6a2 2 0 0 1-.45 2.11L8.09 10.91a16 16 0  0 0 6 6l1.48-1.14a2 2 0  0 1 2.11-.45c.84.29 1.71.5 2.6.62A2 2 0  0 1 22 16.92z"/>','Call',`tel:${phoneVal}`));
     actions.appendChild(actionBtn('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0  0 1-2-2V4a2 2 0  0 1 2-2h9a2 2 0  0 1 2 2v1"/><path d="M12 9l-8-8"/>','Copy',null,phoneVal));
     actions.appendChild(actionBtn('<path d="M20.52 3.48A11.5 11.5 0 0 1 12 23.5h0A11.5 11.5 0 1 1 20.52 3.48z"/><path d="M16.65 17c-1.2.54-2.7.42-4.35-.35-1.5-.7-3.25-2.45-3.95-3.95-.77-1.65-.89-3.15-.35-4.35"/><path d="M9 13l1.5-1.5"/><path d="M11 15l1-1"/>','WhatsApp',`https://wa.me/${String(phoneVal).replace(/[^0-9]/g,'')}`));
   }
+
   if(item.whatsapp){
     actions.appendChild(actionBtn('<path d="M20.52 3.48A11.5 11.5 0 0 1 12 23.5h0A11.5 11.5 0 1 1 20.52 3.48z"/><path d="M16.65 17c-1.2.54-2.7.42-4.35-.35-1.5-.7-3.25-2.45-3.95-3.95-.77-1.65-.89-3.15-.35-4.35"/><path d="M9 13l1.5-1.5"/><path d="M11 15l1-1"/>','WhatsApp',`https://wa.me/${item.whatsapp?.replace(/[^0-9]/g,'')}`));
   }
+
   const site=item.website||item.website_fallback;
   if(site){
     actions.appendChild(actionBtn('<path d="M10.9 2a1 1 0 0 0-.9 1v1H6a4 4 0  0 0-4 4v8a4 4 0  0 0 4 4h8a4 4 0  0 0 4-4v-4h1a1 1 0  0 0 1-1V9a7 7 0  0 0-7-7h-2z"/>','Website',site));
   }
+
   if(item.profile_url){
     actions.appendChild(actionBtn('<path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0  1 1 18 0z"/><circle cx="12" cy="10" r="3"/>','Maps',item.profile_url));
   }
+
   card.appendChild(img);
   title.appendChild(name);
   main.appendChild(title);
   main.appendChild(chips);
   main.appendChild(actions);
   card.appendChild(main);
+
   return card;
 }
 function renderPagination(){
