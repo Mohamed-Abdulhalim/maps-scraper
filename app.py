@@ -14,14 +14,15 @@ sb = create_client(SUPABASE_URL, SUPABASE_ANON_KEY)
 with open("categories.txt") as f:
     HARDCODED_CATEGORIES = sorted({line.strip() for line in f if line.strip()})
 
+
 def _distinct(col):
     rows = (
         sb.table(LEADS_TABLE)
-          .select(col)
-          .not_.is_(col, None)
-          .order(col)
-          .execute()
-          .data
+        .select(col)
+        .not_.is_(col, None)
+        .order(col)
+        .execute()
+        .data
         or []
     )
     unique_vals = set()
@@ -31,19 +32,33 @@ def _distinct(col):
             unique_vals.add(val)
     return sorted(unique_vals)
 
+
 def unique_categories():
     return HARDCODED_CATEGORIES
+
 
 def unique_locations():
     return _distinct("query_location")
 
+
 @app.get("/")
 def index():
     return render_template(
-        "index.html",
+        "leadsignal.html",
         categories=unique_categories(),
         locations=unique_locations(),
     )
+
+
+@app.get("/meta")
+def meta():
+    return jsonify(
+        {
+            "categories": unique_categories(),
+            "locations": unique_locations(),
+        }
+    )
+
 
 @app.get("/search")
 def search():
@@ -72,29 +87,35 @@ def search():
     rows = res.data or []
     for row in rows:
         row = {k: ("" if v is None else v) for k, v in row.items()}
+
         raw = (row.get("photo_urls") or "").strip()
         photos = [u.strip() for u in raw.split(",") if u.strip().startswith("http")]
 
         if not row.get("main_photo_url") and photos:
             row["main_photo_url"] = photos[0]
 
-        row["photos"] = photos
-        items.append(row)
         row_name = row.get("correct_name") or row.get("name") or ""
         row["name"] = row_name
 
-    return jsonify({
-        "items": items,
-        "page": page,
-        "per_page": per_page,
-        "total": total,
-        "pages": pages,
-        "message": "No results found. Try a different category or location." if not items else ""
-    })
+        row["photos"] = photos
+        items.append(row)
+
+    return jsonify(
+        {
+            "items": items,
+            "page": page,
+            "per_page": per_page,
+            "total": total,
+            "pages": pages,
+            "message": "No results found. Try a different category or location."
+            if not items
+            else "",
+        }
+    )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
 
 
 
