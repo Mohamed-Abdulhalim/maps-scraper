@@ -14,7 +14,7 @@ with open("categories.txt") as f:
     HARDCODED_CATEGORIES = sorted({line.strip() for line in f if line.strip()})
 
 
-def _distinct(col, limit=500):
+def _distinct(col, limit=200):
     rows = (
         sb.table(LEADS_TABLE)
         .select(col)
