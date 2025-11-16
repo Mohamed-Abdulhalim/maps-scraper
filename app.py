@@ -41,8 +41,11 @@ def unique_locations():
     return _distinct("query_location")
 
 
-@app.get("/")
+@app.route("/", methods=["GET", "HEAD"])
 def index():
+    if request.method == "HEAD":
+        return "", 200
+
     return render_template(
         "index.html",
         categories=unique_categories(),
