@@ -14,23 +14,30 @@ with open("categories.txt") as f:
     HARDCODED_CATEGORIES = sorted({line.strip() for line in f if line.strip()})
 
 
-def _distinct(col, limit=200):
+def _distinct(col: str, limit: int = 200):
     rows = (
-        sb.table(LEADS_TABLE)
+        supabase
+        .table("places")
         .select(col)
-        .not_.is_(col, None)
+        .not_.is_(col, "null")
         .order(col)
-        .limit(limit)
+        .range(0, limit - 1)
         .execute()
         .data
-        or []
     )
-    unique_vals = set()
+
+    seen = set()
+    values = []
     for r in rows:
-        val = str(r.get(col, "")).strip()
-        if val:
-            unique_vals.add(val)
-    return sorted(unique_vals)
+        v = r.get(col)
+        if not v:
+            continue
+        if v in seen:
+            continue
+        seen.add(v)
+        values.append(v)
+
+    return values
 
 
 def unique_categories():
