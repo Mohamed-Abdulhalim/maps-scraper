@@ -16,14 +16,15 @@ with open("categories.txt") as f:
 
 def _distinct(col: str, limit: int = 200):
     rows = (
-        supabase
-        .table("places")
+        sb
+        .table(LEADS_TABLE)
         .select(col)
-        .not_.is_(col, "null")
+        .not_.is_(col, None)
         .order(col)
         .range(0, limit - 1)
         .execute()
         .data
+        or []
     )
 
     seen = set()
