@@ -2,7 +2,7 @@ name: Scrape
 
 on:
   schedule:
-    - cron: "0 */3 * * *"   # every 3 hours UTC
+    - cron: "0 */12 * * *"
   workflow_dispatch:
     inputs:
       reset:
@@ -57,32 +57,31 @@ jobs:
 
           mapfile -t cities <<'EOF'
           # --- Egypt (governorate capitals / major cities) ---
-          # --- Baghdad, Iraq
-          # --- Cairo, Egypt
-          # --- Alexandria, Egypt
-          # --- Giza, Egypt
-          # --- Port Said, Egypt
-          # --- Suez, Egypt
-          # --- Ismailia, Egypt
-          # --- Tanta, Egypt
+          Cairo, Egypt
+          Alexandria, Egypt
+          Giza, Egypt
+          Port Said, Egypt
+          Suez, Egypt
+          Ismailia, Egypt
+          Tanta, Egypt
           Mansoura, Egypt
-          # --- Zagazig, Egypt
-          # --- Damietta, Egypt
-          # --- Kafr El Sheikh, Egypt
-          # --- Damanhur, Egypt
-          # --- Shebin El Kom, Egypt
-          # --- Banha, Egypt
-          # --- Fayoum, Egypt
-          # --- Beni Suef, Egypt
-          # --- Minya, Egypt
-          # --- Asyut, Egypt
-          # --- Sohag, Egypt
-          # --- Qena, Egypt
-          # --- Luxor, Egypt
-          # --- Aswan, Egypt
-          # --- Hurghada, Egypt
-          # --- Sharm El Sheikh, Egypt
-          # --- Arish, Egypt
+          Zagazig, Egypt
+          Damietta, Egypt
+          Kafr El Sheikh, Egypt
+          Damanhur, Egypt
+          Shebin El Kom, Egypt
+          Banha, Egypt
+          Fayoum, Egypt
+          Beni Suef, Egypt
+          Minya, Egypt
+          Asyut, Egypt
+          Sohag, Egypt
+          Qena, Egypt
+          Luxor, Egypt
+          Aswan, Egypt
+          Hurghada, Egypt
+          Sharm El Sheikh, Egypt
+          Arish, Egypt
           # --- Arab capitals (de facto/admin where relevant) ---
           # --- Algiers, Algeria
           # --- Manama, Bahrain
@@ -203,7 +202,7 @@ jobs:
       - name: Run scraper (never fail even if scraper crashes at the end)
         run: |
           echo "Scraping city: $CITY"
-          python maps.py --categories-file categories.txt --location "$CITY" --max-places 20 --output TheResultss.csv --headless || true
+          python maps.py --categories-file categories.txt --location "$CITY" --max-places 100 --output TheResultss.csv --headless || true
 
       - name: Clean CSV
         run: |
@@ -211,7 +210,7 @@ jobs:
 
       - name: Enrich phones from detail pages
         run: |
-          python phone_enricher.py --in Cleaned.csv --out Enriched.csv --limit 1000
+          python phone_enricher.py --in Cleaned.csv --out Enriched.csv --limit 100000
 
       - name: Push to Supabase
         run: python supabase_push.py Enriched.csv
