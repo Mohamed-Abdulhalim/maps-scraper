@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from supabase import create_client
 
 
-TABLE_NAME = os.environ.get("LEADS_TABLE", "places_test")
+TABLE_NAME = os.environ.get("LEADS_TABLE", "production_maps")
 
 
 def to_bool(v: str):
