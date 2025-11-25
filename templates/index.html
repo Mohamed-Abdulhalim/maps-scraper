@@ -18,14 +18,32 @@ img{max-width:100%;display:block}
 button{font:inherit}
 a{color:inherit;text-decoration:none}
 .container{display:grid;grid-template-columns:260px 1fr;gap:24px;min-height:100vh;padding:24px}
-@media (max-width:1024px){.container{grid-template-columns:1fr;padding:16px}}
-body.nav-closed .container{
-  grid-template-columns:1fr;
+@media (max-width:1024px){
+  .container{grid-template-columns:1fr;padding:16px}
 }
 .card{background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));border:1px solid rgba(255,255,255,.06);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .shadow-hover{transition:transform .18s ease, box-shadow .18s ease}
 .shadow-hover:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(0,0,0,.35)}
 .sidebar{position:sticky;top:16px;height:calc(100vh - 32px);padding:16px;display:flex;flex-direction:column;gap:16px}
+@media (max-width:1024px){
+  .sidebar{
+    position:fixed;
+    top:0;
+    left:0;
+    height:100vh;
+    width:260px;
+    padding:16px;
+    transform:translateX(-100%);
+    transition:transform .25s ease, box-shadow .25s ease, background .25s ease;
+    z-index:40;
+    border-radius:0 16px 16px 0;
+  }
+  body.nav-open .sidebar{
+    transform:translateX(0);
+    box-shadow:0 0 40px rgba(0,0,0,.7);
+    background:radial-gradient(circle at top,rgba(15,23,42,.98),rgba(15,23,42,.96));
+  }
+}
 .brand{display:flex;align-items:center;gap:10px;padding:12px 12px 16px}
 .brand-logo{width:28px;height:28px;border-radius:8px;overflow:hidden;display:grid;place-items:center}
 .brand-logo svg{display:block;width:100%;height:100%}
@@ -157,16 +175,64 @@ body.nav-closed .container{
 #btn-search{display:inline-grid;grid-auto-flow:column;align-items:center;gap:8px;border-radius:12px}
 #btn-preview{border:1px solid rgba(107,121,255,.35);background:transparent;color:#cfd5ff;border-radius:12px;padding:10px 12px}
 #btn-preview:hover{background:rgba(255,255,255,.06)}
-.nav-toggle{position:fixed;top:16px;left:16px;z-index:50;width:34px;height:30px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(15,23,42,.9);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;cursor:pointer;}
-.nav-toggle span{width:18px;height:2px;border-radius:999px;background:#e5e7ff;}
-body.nav-closed .sidebar{display:none;}
-@media (max-width:1024px){.nav-toggle{top:12px;left:12px;}}
+.nav-toggle{
+  position:fixed;
+  top:16px;
+  left:16px;
+  z-index:50;
+  width:36px;
+  height:32px;
+  border-radius:999px;
+  border:1px solid rgba(148,163,255,.55);
+  background:rgba(15,23,42,.9);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+  box-shadow:0 10px 25px rgba(15,23,42,.7);
+  backdrop-filter:blur(10px);
+}
+.nav-toggle span{
+  width:16px;
+  height:2px;
+  border-radius:999px;
+  background:#e5e7ff;
+  transition:transform .2s ease, opacity .2s ease;
+}
+body.nav-open .nav-toggle span:nth-child(1){
+  transform:translateY(4px) rotate(45deg);
+}
+body.nav-open .nav-toggle span:nth-child(2){
+  opacity:0;
+}
+body.nav-open .nav-toggle span:nth-child(3){
+  transform:translateY(-4px) rotate(-45deg);
+}
+.nav-backdrop{
+  position:fixed;
+  inset:0;
+  z-index:35;
+  background:radial-gradient(circle at top,rgba(15,23,42,.8),rgba(15,23,42,.96));
+  backdrop-filter:blur(6px);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .25s ease;
+}
+body.nav-open .nav-backdrop{
+  opacity:1;
+  pointer-events:auto;
+}
+@media (max-width:1024px){
+  .nav-toggle{display:flex;}
+}
 </style>
 </head>
 <body>
 <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
   <span></span><span></span><span></span>
 </button>
+<div class="nav-backdrop" id="nav-backdrop"></div>
 <div class="container">
   <aside class="sidebar card">
     <div class="brand">
@@ -307,12 +373,14 @@ const navHome=document.getElementById('nav-home');
 const navSearch=document.getElementById('nav-search');
 const ctaStart=document.getElementById('cta-start');
 const navToggle=document.getElementById('nav-toggle');
+const navBackdrop=document.getElementById('nav-backdrop');
 
 function showHome(){
   panelHome.hidden=false;
   panelSearch.hidden=true;
   navHome.setAttribute('aria-current','page');
   navSearch.removeAttribute('aria-current');
+  document.body.classList.remove('nav-open');
 }
 
 function showSearch(){
@@ -320,14 +388,25 @@ function showSearch(){
   panelSearch.hidden=false;
   navSearch.setAttribute('aria-current','page');
   navHome.removeAttribute('aria-current');
+  document.body.classList.remove('nav-open');
 }
-navHome.addEventListener('click',showHome);
-navSearch.addEventListener('click',showSearch);
-ctaStart.addEventListener('click',e=>{e.preventDefault();showSearch();document.getElementById('category').focus()});
-document.body.classList.add('nav-closed');
-navToggle.addEventListener('click',()=>{
-  document.body.classList.toggle('nav-closed');
+
+navHome.addEventListener('click',()=>{showHome();});
+navSearch.addEventListener('click',()=>{showSearch();});
+
+ctaStart.addEventListener('click',e=>{
+  e.preventDefault();
+  showSearch();
+  document.getElementById('category').focus();
 });
+
+navToggle.addEventListener('click',()=>{
+  document.body.classList.toggle('nav-open');
+});
+navBackdrop.addEventListener('click',()=>{
+  document.body.classList.remove('nav-open');
+});
+
 document.getElementById('year').textContent=new Date().getFullYear();
 document.getElementById('to-top').addEventListener('click',e=>{e.preventDefault();window.scrollTo({top:0,behavior:'smooth'})});
 const toast=document.getElementById('toast');
@@ -367,6 +446,7 @@ const obs=new IntersectionObserver((entries)=>{
   })
 },{threshold:.6});
 countEls.forEach(el=>obs.observe(el));
+
 function initAutocomplete(inputEl, source, menuEl){
   let idx = -1;
   const render = (items)=>{
@@ -441,40 +521,33 @@ function initAutocomplete(inputEl, source, menuEl){
     }
   });
 }
-let CATS = [];
-let LOCS = [];
 
-// Fetch meta data from the SAME origin (Vercel Flask app)
-fetch("/meta")
-  .then(r => r.json())
-  .then(data => {
-      CATS = ['All categories', ...data.categories];
-      LOCS = data.locations || [];
-      initAutocomplete(
-        document.getElementById('category'),
-        CATS,
-        document.getElementById('ac-categories')
-      );
-      initAutocomplete(
-        document.getElementById('location'),
-        LOCS,
-        document.getElementById('ac-locations')
-      );
+let CATS=[];
+let LOCS=[];
+function wireAutocomplete(){
+  const catInput=document.getElementById('category');
+  const locInput=document.getElementById('location');
+  const catMenu=document.getElementById('ac-categories');
+  const locMenu=document.getElementById('ac-locations');
+
+  if(!CATS.length){
+    CATS=['All categories'];
+  }else if(CATS[0] !== 'All categories'){
+    CATS=['All categories', ...CATS];
+  }
+  initAutocomplete(catInput,CATS,catMenu);
+  initAutocomplete(locInput,LOCS,locMenu);
+}
+
+fetch('/meta')
+  .then(r=>r.json())
+  .then(data=>{
+    CATS = Array.isArray(data.categories)?data.categories.filter(Boolean):[];
+    LOCS = Array.isArray(data.locations)?data.locations.filter(Boolean):[];
+    wireAutocomplete();
   })
-  .catch(() => {
-      // Fallback so the UI still works in case /meta fails
-      CATS = ['All categories'];
-      LOCS = [];
-      initAutocomplete(
-        document.getElementById('category'),
-        CATS,
-        document.getElementById('ac-categories')
-      );
-      initAutocomplete(
-        document.getElementById('location'),
-        LOCS,
-        document.getElementById('ac-locations')
-      );
+  .catch(()=>{
+    wireAutocomplete();
   });
 
 function actionBtn(iconPath,label,href,copy){
