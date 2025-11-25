@@ -492,16 +492,23 @@ function initAutocomplete(inputEl, source, menuEl){
     menuEl.classList.toggle('show', true);
   });
   const renderAll = ()=> render(source.slice(0, 200));
-  inputEl.addEventListener('focus', ()=>{
-    idx = -1;
-    renderAll();
-    menuEl.classList.add('show');
-  });
-  inputEl.addEventListener('click', ()=>{
-    idx = -1;
-    renderAll();
-    menuEl.classList.add('show');
-  });
+// Open on focus
+inputEl.addEventListener('focus', ()=>{
+  idx = -1;
+  renderAll();
+  menuEl.classList.add('show');
+});
+
+// Toggle open/close on click
+inputEl.addEventListener('click', ()=>{
+  if (menuEl.classList.contains('show')) {
+    menuEl.classList.remove('show');   // close
+    return;
+  }
+  idx = -1;
+  renderAll();
+  menuEl.classList.add('show');        // open
+});
   inputEl.addEventListener('keydown', (e)=>{
     if(e.key === 'ArrowDown' && !menuEl.classList.contains('show')){
       e.preventDefault();
