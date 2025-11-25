@@ -444,16 +444,39 @@ function initAutocomplete(inputEl, source, menuEl){
 let CATS = [];
 let LOCS = [];
 
-fetch("https://YOUR-APP.fly.dev/meta")
+// Fetch meta data from the SAME origin (Vercel Flask app)
+fetch("/meta")
   .then(r => r.json())
   .then(data => {
-      CATS = data.categories;
-      LOCS = data.locations;
-      initAutocomplete(document.getElementById('category'), CATS, document.getElementById('ac-categories'));
-      initAutocomplete(document.getElementById('location'), LOCS, document.getElementById('ac-locations'));
+      CATS = ['All categories', ...data.categories];
+      LOCS = data.locations || [];
+      initAutocomplete(
+        document.getElementById('category'),
+        CATS,
+        document.getElementById('ac-categories')
+      );
+      initAutocomplete(
+        document.getElementById('location'),
+        LOCS,
+        document.getElementById('ac-locations')
+      );
+  })
+  .catch(() => {
+      // Fallback so the UI still works in case /meta fails
+      CATS = ['All categories'];
+      LOCS = [];
+      initAutocomplete(
+        document.getElementById('category'),
+        CATS,
+        document.getElementById('ac-categories')
+      );
+      initAutocomplete(
+        document.getElementById('location'),
+        LOCS,
+        document.getElementById('ac-locations')
+      );
   });
-initAutocomplete(document.getElementById('category'),CATS,document.getElementById('ac-categories'));
-initAutocomplete(document.getElementById('location'),LOCS,document.getElementById('ac-locations'));
+
 function actionBtn(iconPath,label,href,copy){
   const a=document.createElement('a');
   a.className='action';
