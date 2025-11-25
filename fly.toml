@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for maps-scraper-btnvcw on 2025-11-25T12:25:53Z
+# fly.toml app configuration file generated for maps-scraper-hpivmw on 2025-11-25T12:37:57Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'maps-scraper-btnvcw'
-primary_region = 'fra'
+app = 'maps-scraper-hpivmw'
+primary_region = 'cdg'
 
 [build]
 
