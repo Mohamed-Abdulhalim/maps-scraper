@@ -2,6 +2,14 @@
 # -*- coding: utf-8 -*-
 import argparse, csv, re, unicodedata, json, logging, sys
 from urllib.parse import unquote, urlparse, parse_qs
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from config import LOG_FORMAT, LOG_LEVEL
+
 
 CURRENCY_PATTERNS = [
     r"(?:EGP|ج(?:\.\s*)م|LE|L\.E\.|E\s*P|جنيه)\s*\d+[\d\s,\.]*\+?",
@@ -460,17 +468,18 @@ def main():
     ap.add_argument("--in", dest="inp", required=True)
     ap.add_argument("--out", dest="out", required=True)
     ap.add_argument("--drop-empty-name", action="store_true")
-    ap.add_argument("--log", dest="log", default="INFO")
+    ap.add_argument("--log", dest="log", default=LOG_LEVEL)
     args = ap.parse_args()
-    level = getattr(logging, args.log.upper(), logging.INFO)
+    level = getattr(logging, args.log.upper(), getattr(logging, LOG_LEVEL, logging.INFO))
     logging.basicConfig(
         level=level,
-        format="%(asctime)s - %(levelname)s - %(message)s",
+        format=LOG_FORMAT,
         handlers=[
             logging.FileHandler("csv_cleaner.log", encoding="utf-8"),
             logging.StreamHandler(stream=sys.stdout),
         ],
     )
+
     logging.info("Starting CSV cleaning: in=%s out=%s drop_empty_name=%s", args.inp, args.out, args.drop_empty_name)
     process(args.inp, args.out, drop_empty_name=args.drop_empty_name)
 
