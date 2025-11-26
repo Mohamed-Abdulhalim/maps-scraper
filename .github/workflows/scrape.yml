@@ -202,18 +202,18 @@ jobs:
       - name: Run scraper (never fail even if scraper crashes at the end)
         run: |
           echo "Scraping city: $CITY"
-          python maps_scraper.py --categories-file categories.txt --location "$CITY" --max-places 50 --output TheResultss.csv --headless || true
+          python scraper/maps_scraper.py --categories-file categories.txt --location "$CITY" --max-places 50 --output TheResultss.csv --headless || true
 
       - name: Clean CSV
         run: |
-          python csv_cleaner.py --in TheResultss.csv --out Cleaned.csv
+          python cleaner/csv_cleaner.py --in TheResultss.csv --out Cleaned.csv
 
       - name: Enrich phones from detail pages
         run: |
-          python phone_enricher.py --in Cleaned.csv --out Enriched.csv --limit 100000
+          python scraper/phone_enricher.py --in Cleaned.csv --out Enriched.csv --limit 100000
 
       - name: Push to Supabase
-        run: python supabase_push.py Enriched.csv
+        run: python db/supabase_push.py Enriched.csv
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
