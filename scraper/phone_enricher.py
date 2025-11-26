@@ -186,8 +186,6 @@ def process(input_csv: str, output_csv: str, limit: Optional[int] = None, headle
             url = (row.get("profile_url") or "").strip()
             if not url:
                 continue
-            if row.get("phone_e164"):
-                continue
 
             phone = get_phone_from_page(driver, url)
             jitter()
@@ -229,7 +227,6 @@ def main():
             logging.StreamHandler(stream=sys.stdout),
         ],
     )
-
 
     logging.info(
         "CLI args: in=%s out=%s limit=%s no_headless=%s log=%s",
