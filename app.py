@@ -39,7 +39,6 @@ def _distinct(col: str, batch: int = 2000, max_batches: int = 250):
             seen.add(v)
             values.append(v)
 
-        # no more pages
         if len(rows) < batch:
             break
 
@@ -48,13 +47,27 @@ def _distinct(col: str, batch: int = 2000, max_batches: int = 250):
     return values
 
 
-
 def unique_categories():
     return HARDCODED_CATEGORIES
 
 
 def unique_locations():
-    return _distinct("query_location")
+    res = (
+        sb.table("distinct_query_locations")
+        .select("query_location")
+        .order("query_location")
+        .execute()
+    )
+
+    rows = res.data or []
+    values = []
+    for r in rows:
+        v = (r.get("query_location") or "").strip()
+        if v:
+            values.append(v)
+
+    return values
+
 
 
 @app.route("/", methods=["GET", "HEAD"])
