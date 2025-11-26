@@ -27,17 +27,32 @@ try:
 except Exception:
     winreg = None
 
-USER_AGENTS = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Safari/605.1.15",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-]
-ACCEPT_LANG = [
-    "en-US,en;q=0.9,ar;q=0.7",
-    "en-GB,en;q=0.9,ar;q=0.7",
-    "ar-EG,ar;q=0.9,en;q=0.6",
-]
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+from config import (
+    PAGELOAD_TIMEOUT,
+    SCRIPT_TIMEOUT,
+    MAX_SCROLL_TRIES,
+    CSV_FIELDS,
+    BROWSER_RESTART_EVERY,
+    SCRAPER_JITTER_MIN,
+    SCRAPER_JITTER_MAX,
+    USER_AGENTS,
+    ACCEPT_LANG,
+    CHROME_VERSION_FALLBACK,
+    DEFAULT_MAX_PLACES,
+    LOG_FORMAT,
+    LOG_LEVEL,
+    SCROLL_BATCH_MIN,
+    SCROLL_BATCH_MAX,
+    SCROLL_DELAY_MIN,
+    SCROLL_DELAY_MAX,
+)
+
 def canonicalize_maps_url(u: str) -> str:
     if not u:
         return ""
@@ -75,16 +90,8 @@ DETAIL_WEBSITE_BTN_XP = "//div[contains(@class,'m6QErb') and contains(@class,'WN
 DETAIL_SOCIAL_LINKS_XP = "//a[@href and (contains(@href,'facebook.com') or contains(@href,'instagram.com') or contains(@href,'x.com') or contains(@href,'twitter.com') or contains(@href,'tiktok.com'))]"
 DETAIL_PHOTOS_IMG_XP = "//img[contains(@src,'googleusercontent') or contains(@src,'ggpht')][@src]"
 
-SCROLL_BATCH = 6
-MAX_SCROLL_TRIES = 50
-RESTART_EVERY_CATEGORIES = 1
-PAGELOAD_TIMEOUT = 30
-SCRIPT_TIMEOUT = 20
-READ_TIMEOUT = 120
 
-CSV_FIELDS = [
-    "category","query_location","name","category_line","address_line","plus_code","phone","website","profile_url","rating","reviews_count","opening_hours","social_links","photo_urls","timestamp"
-]
+READ_TIMEOUT = 120
 
 @dataclass
 class Place:
@@ -104,7 +111,7 @@ class Place:
     photo_urls: str = ""
     timestamp: str = ""
 
-def jitter(a=0.6, b=1.6):
+def jitter(a=SCRAPER_JITTER_MIN, b=SCRAPER_JITTER_MAX):
     time.sleep(random.uniform(a, b))
 
 
@@ -171,7 +178,7 @@ def new_driver(headless: bool, proxy: Optional[str]):
     if proxy:
         opts.add_argument(f"--proxy-server={proxy}")
         logging.info("Using proxy: %s", proxy)
-    major = get_installed_chrome_major() or 141
+    major = get_installed_chrome_major() or CHROME_VERSION_FALLBACK
     driver = uc.Chrome(options=opts, version_main=major)
     try:
         driver.set_page_load_timeout(PAGELOAD_TIMEOUT)
@@ -494,7 +501,7 @@ def scroll_results_pane(driver, seen: Optional[Set[str]] = None, category: str =
             prev_top = driver.execute_script("return arguments[0].scrollTop", feed)
         except Exception:
             prev_height = None; prev_top = None
-        steps = random.randint(3, 6)
+        steps = random.randint(SCROLL_BATCH_MIN, SCROLL_BATCH_MAX)
         for _ in range(steps):
             delta = random.randint(320, 800)
             try:
@@ -504,7 +511,7 @@ def scroll_results_pane(driver, seen: Optional[Set[str]] = None, category: str =
                     driver.find_element(By.TAG_NAME, "body").send_keys(Keys.PAGE_DOWN)
                 except Exception:
                     pass
-            jitter(0.25, 0.7)
+            jitter(SCROLL_DELAY_MIN, SCROLL_DELAY_MAX)
         deadline = time.time() + random.uniform(5.5, 8.0)
         grew = False
         reached_end_hint = False
@@ -652,12 +659,12 @@ def parse_args():
     g.add_argument("--categories", type=str, default="", help="Comma-separated categories")
     g.add_argument("--categories-file", type=str, default="", help="Text file with one category per line")
     g.add_argument("--location", type=str, required=True, help="Search location")
-    g.add_argument("--max-places", type=int, default=500, help="Max places per category")
+    g.add_argument("--max-places", type=int, default=DEFAULT_MAX_PLACES, help="Max places per category")
     g.add_argument("--output", type=str, required=True, help="Output CSV path")
     r = p.add_argument_group("Runtime")
     r.add_argument("--headless", action="store_true", help="Run browser headless")
     r.add_argument("--proxy", type=str, default="", help="Optional proxy like http://user:pass@host:port")
-    r.add_argument("--log", type=str, default="INFO", help="Logging level: DEBUG|INFO|WARNING|ERROR")
+    r.add_argument("--log", type=str, default=LOG_LEVEL, help="Logging level: DEBUG|INFO|WARNING|ERROR")
     return p.parse_args()
 
 
@@ -673,8 +680,15 @@ def load_categories(args) -> List[str]:
 
 def main():
     args = parse_args()
-    level = getattr(logging, args.log.upper(), logging.INFO)
-    logging.basicConfig(level=level, format="%(asctime)s - %(levelname)s - %(message)s", handlers=[logging.FileHandler("scraper.log", encoding="utf-8"), logging.StreamHandler(stream=sys.stdout)])
+    level = getattr(logging, args.log.upper(), getattr(logging, LOG_LEVEL, logging.INFO))
+    logging.basicConfig(
+        level=level,
+        format=LOG_FORMAT,
+        handlers=[
+            logging.FileHandler("scraper.log", encoding="utf-8"),
+            logging.StreamHandler(stream=sys.stdout),
+        ],
+    )
     categories = load_categories(args)
     if not categories:
         logging.error("No categories provided. Use --categories or --categories-file.")
@@ -698,7 +712,7 @@ def main():
                 driver = new_driver(headless=args.headless, proxy=args.proxy or None)
                 written = harvest_category(driver, cat, args.location, args.output, seen, args.max_places)
                 total_all += written
-            if idx % RESTART_EVERY_CATEGORIES == 0:
+            if idx % BROWSER_RESTART_EVERY == 0:
                 try:
                     driver.quit()
                 except Exception:
