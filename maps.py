@@ -551,14 +551,16 @@ def build_search_url(query: str, location: str, hl: str = "en", gl: str = "eg") 
     return f"https://www.google.com/maps/search/{q}?hl={hl}&gl={gl}"
 
 
-def get_with_retry(driver, url: str, tries=2, cool=2.5):
+def get_with_retry(driver, url: str, tries=2, cool=2.5) -> bool:
     last = None
     for i in range(tries):
         try:
             driver.execute_cdp_cmd("Page.enable", {})
             driver.get(url)
-            WebDriverWait(driver, PAGELOAD_TIMEOUT).until(lambda d: len(d.find_elements(By.CSS_SELECTOR, CARD_CONTAINER_CSS)) > 0)
-            return
+            WebDriverWait(driver, PAGELOAD_TIMEOUT).until(
+                lambda d: len(d.find_elements(By.CSS_SELECTOR, CARD_CONTAINER_CSS)) > 0
+            )
+            return True
         except (WebDriverException, ReadTimeoutError, NewConnectionError, MaxRetryError, TimeoutException) as e:
             last = e
             logging.warning("Navigation attempt %d/%d failed: %s", i + 1, tries, e)
@@ -567,13 +569,16 @@ def get_with_retry(driver, url: str, tries=2, cool=2.5):
             except Exception:
                 pass
             time.sleep(cool)
-    raise last if last else RuntimeError("navigation failed")
-
+    logging.error("Navigation failed for %s after %d tries: %s", url, tries, last)
+    return False
 
 def harvest_category(driver, category: str, location: str, csv_path: str, seen: Set[str], max_places: int) -> int:
     url = build_search_url(category, location)
     logging.info("Navigating to search: %s", url)
-    get_with_retry(driver, url, tries=2, cool=2.5)
+
+    if not get_with_retry(driver, url, tries=2, cool=2.5):
+        logging.warning("Skipping category '%s' due to repeated navigation failure", category)
+        return 0
     jitter(1.0, 1.6)
     _zoom_out_once(driver)
     _click_more_places_if_present(driver)
