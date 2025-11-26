@@ -1,104 +1,165 @@
-# Lead Finder – Google Maps Scraper (Automated)
+Lead Finder – Automated Google Maps Scraper & Lead Pipeline
 
-**Collect business leads from Google Maps.**  
-Categories → CSV → Cleaned → Upserted into Supabase → Displayed in a web dashboard.
+A production-grade pipeline that turns Google Maps into clean, structured business leads.
+Scrape → Clean → Enrich → Upsert → View in a live dashboard.
 
-This repository contains an automated scraping pipeline that:
+Built for real-world use: scalable scraping, automated cleaning, deduplication, and a live Supabase-powered UI deployed on Vercel.
 
-- Scrapes business listings from Google Maps using **Selenium + undetected_chromedriver**
-- Cleans and normalizes data (phone formatting, address recovery, price extraction, duplicate photo detection)
-- Pushes cleaned data to **Supabase** (upsert — no duplicates)
-- Runs automatically on **GitHub Actions** (scheduled scraping)
+✨ Highlights (Why This Project Feels Enterprise-Level)
+Full Google Maps Extraction
 
-> Built to solve a real problem: *finding clean contact data without manual search.*
+Scrapes names, phones, websites, addresses, ratings, reviews, photos, categories, and deep profile details.
 
----
+Uses Selenium + undetected-chromedriver, rotating UA/languages, randomized delays, and periodic browser restarts to avoid bans.
 
-## ✨ Features
+Industrial-grade Cleaning & Normalization
 
-| Feature | Details |
-|--------|---------|
-| ✅ Google Maps data extraction | Name, phone, website, address, rating, photos, categories |
-| ✅ CSV cleaning pipeline | Fixes addresses, removes duplicates, normalizes phone numbers |
-| ✅ Unique image extraction | Removes repeated Google Maps photo URLs across rows |
-| ✅ Automated CI/CD pipeline | Scraper → Cleaner → Supabase push |
-| ✅ Idempotent upsert | Avoids duplicated database entries |
-| ✅ Secrets safe | No credentials committed into git |
+Fixes and standardizes phone numbers, addresses, URLs, and social links.
 
----
+Extracts price info where available.
 
-## 🛠️ Tech Stack
+Removes duplicate businesses and duplicate photos.
 
-- **Python 3.11**
-- `undetected-chromedriver`, `selenium`
-- Supabase (PostgreSQL)
-- GitHub Actions (CI/CD automation)
+Produces clean, analysis-ready datasets.
 
----
+Phone Enrichment Layer
 
-## 📂 Repository Structure
+Revisits profiles missing phone numbers and pulls them directly from the business’s detailed section.
 
-```
+Supabase Cloud Database (Upsert Logic)
+
+Final data is upserted into PostgreSQL (via Supabase).
+
+Idempotent inserts keyed by profile URL ensure no duplicates ever.
+
+Batch upserts for performance.
+
+CI/CD Automation
+
+GitHub Actions runs the full pipeline (scrape → clean → enrich → upload) on a schedule.
+
+Rotates target cities each run for wide geographic coverage.
+
+Zero manual intervention required.
+
+Live Dashboard UI
+
+Flask backend + Vercel deployment.
+
+Search by category / location.
+
+Fast pagination, mobile-friendly UI, instant data access.
+
+Security Built-In
+
+No credentials in code.
+
+.env.example provided for local dev.
+
+Production secrets stored in GitHub Secrets.
+
+🛠️ Tech Stack
+
+Python 3.11
+
+Selenium, undetected-chromedriver
+
+Supabase (PostgreSQL)
+
+GitHub Actions (CI)
+
+Flask (dashboard + API)
+
+HTML/JS frontend (Vercel)
+
+📂 Project Structure
 maps-scraper/
-│
-├── maps.py             # Google Maps scraper → results.csv
-├── csv_cleaner.py      # Cleans / normalizes scraped CSV
-├── supabase_push.py    # Upserts final CSV into Supabase
-├── categories.txt      # List of categories to scrape (one per line)
-├── .github/workflows/
-│   └── scrape.yml      # Scheduled GitHub Action (scrape + clean + push)
+├── maps.py             # Main scraper → results.csv
+├── csv_cleaner.py      # Cleans & normalizes → Cleaned.csv
+├── phone_enricher.py   # Fills missing phones → Enriched.csv
+├── supabase_push.py    # Upsert into Supabase
+├── app.py              # Flask API + dashboard
+├── templates/index.html
+├── categories.txt
 ├── requirements.txt
-└── .env.example        # Environment variables (local only)
-```
+└── .github/workflows/scrape.yml
 
-## ⚙️ Environment Variables
+⚙️ Local Setup
 
-Create `.env`:
+Install packages
 
-SUPABASE_URL=<your-project-url>
-SUPABASE_SERVICE_ROLE=<service-role-key>
-> Do NOT commit real keys — use **GitHub Secrets** for automation.
+pip install -r requirements.txt
 
----
 
-## 🚀 Run locally
+Create .env
 
-```bash
+SUPABASE_URL=...
+SUPABASE_SERVICE_ROLE=...
+
+
+Run pipeline
+
 py maps.py --categories-file categories.txt --location "Cairo, Egypt" --max-places 20 --output results.csv --headless
-
 py csv_cleaner.py --in results.csv --out Cleaned.csv
+py phone_enricher.py --in Cleaned.csv --out Enriched.csv
+py supabase_push.py Enriched.csv
 
-py supabase_push.py Cleaned.csv
-```
-🕒 GitHub Actions (Auto-Scraping)
 
-The repo includes a workflow that:
+Run dashboard
 
-- Runs the scraper headlessly
+export SUPABASE_URL=...
+export SUPABASE_ANON_KEY=...
+py app.py
 
-- Cleans the results
 
-- Pushes to Supabase
+Visit: http://localhost:5000
 
-To trigger manually:
-GitHub repo → Actions → Run workflow
+🕒 Automation (GitHub Actions)
 
-🔥 Roadmap
+The pipeline runs automatically on schedule:
 
-✅ Dashboard UI (in progress)
+Headless scrape
 
-⏳ Export to Excel / Notion
+Cleaning
 
-⏳ Paid version with filters & email enrichment
+Phone enrichment
+
+Upsert to Supabase
+
+Rotate to next city
+
+Trigger manually via Actions → Run workflow.
+
+💡 Use Cases
+
+Lead generation for sales teams
+
+Local business intelligence
+
+Market research
+
+Building directories or location-based apps
+
+Automated client data collection for agencies/consultants
+
+🔮 Roadmap
+
+Excel / Notion export
+
+Email enrichment
+
+Rating / “open now” filters in UI
+
+Multi-region parallel scraping
+
+Advanced analytics dashboard
 
 📜 License
 
-This project is licensed under MIT License.
+MIT License.
 
 🙋‍♂️ Author
 
 Mohamed Abdulhalim
-
 Data scraping, automation, Supabase & Python development.
-
-LinkedIn: https://[www.linkedin.com/in/mohamed-abdulhalim](https://www.linkedin.com/in/halim99/)
+LinkedIn: https://www.linkedin.com/in/halim99/
