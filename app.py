@@ -145,16 +145,14 @@ def search():
         if addr:
             q = q.ilike("address_line", f"%{addr}%")
 
-    # sorting
+    # sorting (no reviews_count column involved)
     if sort == "rating_desc":
         q = q.order("rating", desc=True)
-    elif sort == "reviews_desc":
-        q = q.order("reviews_count", desc=True)
     elif sort == "name_asc":
         q = q.order("name")
     else:
-        # "best match" default: higher rating & reviews first
-        q = q.order("rating", desc=True).order("reviews_count", desc=True)
+        # default "best match": highest rating first
+        q = q.order("rating", desc=True)
 
     q = q.range(offset, offset + per_page - 1)
 
