@@ -71,7 +71,6 @@ def jitter(a=ENRICH_JITTER_MIN, b=ENRICH_JITTER_MAX):
     time.sleep(random.uniform(a, b))
 
 
-
 def new_driver(headless: bool):
     ua = random.choice(USER_AGENTS)
     logging.info("Launching phone-enricher browser: UA=%s | headless=%s", ua, headless)
@@ -86,9 +85,11 @@ def new_driver(headless: bool):
     opts.add_argument("--window-size=1280,900")
     opts.add_argument("--blink-settings=imagesEnabled=true")
 
-    major = get_installed_chrome_major() or 142
-    d = uc.Chrome(options=opts, version_main=major)
-
+    major = get_installed_chrome_major() or 142  # This line is fine
+    logging.info(f"Detected Chrome major version: {major}")
+    
+    # Force uc to use that version
+    d = uc.Chrome(options=opts, version_main=major, driver_executable_path=None)  # 👈 this is important
 
     try:
         d.set_page_load_timeout(PAGELOAD_TIMEOUT)
