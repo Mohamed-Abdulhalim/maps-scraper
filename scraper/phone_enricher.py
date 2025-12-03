@@ -19,7 +19,6 @@ if str(ROOT_DIR) not in sys.path:
 
 from config import (
     USER_AGENTS,
-    CHROME_VERSION_FALLBACK,
     PAGELOAD_TIMEOUT,
     SCRIPT_TIMEOUT,
     ENRICH_JITTER_MIN,
