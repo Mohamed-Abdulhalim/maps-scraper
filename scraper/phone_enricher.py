@@ -106,8 +106,16 @@ def new_driver(headless: bool):
     opts.add_argument("--user-agent=" + ua)
     opts.add_argument("--window-size=1280,900")
     opts.add_argument("--blink-settings=imagesEnabled=true")
-    major = get_installed_chrome_major() or CHROME_VERSION_FALLBACK
-    d = uc.Chrome(options=opts, version_main=major)
+
+    major = get_installed_chrome_major()
+    if platform.system().lower() == "windows" and not major:
+        major = CHROME_VERSION_FALLBACK
+
+    if major:
+        d = uc.Chrome(options=opts, version_main=major)
+    else:
+        d = uc.Chrome(options=opts)
+
     try:
         d.set_page_load_timeout(PAGELOAD_TIMEOUT)
         d.set_script_timeout(SCRIPT_TIMEOUT)
