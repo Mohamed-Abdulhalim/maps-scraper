@@ -9,8 +9,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
-from browser_utils import get_installed_chrome_major
-
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +26,7 @@ from config import (
     LOG_FORMAT,
     LOG_LEVEL,
 )
-
+from browser_utils import get_installed_chrome_major
 DETAIL_PHONE_XP = "//button[.//div[contains(text(),'Phone') or contains(text(),'الهاتف') or contains(text(),'اتصال')]] | //a[contains(@href,'tel:')]"
 
 PHONE_RE = re.compile(r"(?:\+?20)?0?\d{8,11}")
