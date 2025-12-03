@@ -9,10 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, WebDriverException
 
-try:
-    import winreg
-except Exception:
-    winreg = None
+from browser_utils import get_installed_chrome_major
 
 from pathlib import Path
 
@@ -76,21 +73,6 @@ def normalize_phone_e164(s: str) -> str:
 def jitter(a=ENRICH_JITTER_MIN, b=ENRICH_JITTER_MAX):
     time.sleep(random.uniform(a, b))
 
-
-def get_installed_chrome_major() -> Optional[int]:
-    try:
-        if platform.system().lower() != "windows" or winreg is None:
-            return None
-        for root in (winreg.HKEY_CURRENT_USER, winreg.HKEY_LOCAL_MACHINE):
-            try:
-                k = winreg.OpenKey(root, r"Software\\Google\\Chrome\\BLBeacon")
-                v, _ = winreg.QueryValueEx(k, "version")
-                return int(str(v).split(".")[0])
-            except OSError:
-                pass
-    except Exception:
-        return None
-    return None
 
 
 def new_driver(headless: bool):
