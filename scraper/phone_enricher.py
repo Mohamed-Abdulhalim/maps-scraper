@@ -108,9 +108,6 @@ def new_driver(headless: bool):
     opts.add_argument("--blink-settings=imagesEnabled=true")
 
     major = get_installed_chrome_major()
-    if platform.system().lower() == "windows" and not major:
-        major = CHROME_VERSION_FALLBACK
-
     if major:
         d = uc.Chrome(options=opts, version_main=major)
     else:
