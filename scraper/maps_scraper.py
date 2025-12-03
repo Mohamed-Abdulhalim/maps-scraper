@@ -43,6 +43,7 @@ from config import (
     SCRAPER_JITTER_MAX,
     USER_AGENTS,
     ACCEPT_LANG,
+    CHROME_VERSION_FALLBACK,
     DEFAULT_MAX_PLACES,
     LOG_FORMAT,
     LOG_LEVEL,
@@ -51,7 +52,6 @@ from config import (
     SCROLL_DELAY_MIN,
     SCROLL_DELAY_MAX,
 )
-from browser_utils import get_installed_chrome_major
 
 def canonicalize_maps_url(u: str) -> str:
     if not u:
@@ -162,7 +162,6 @@ def new_driver(headless: bool, proxy: Optional[str]):
     ua = random.choice(USER_AGENTS)
     lang = random.choice(ACCEPT_LANG)
     logging.info("Launching browser: UA=%s | Lang=%s | Headless=%s", ua, lang, headless)
-
     opts = uc.ChromeOptions()
     if headless:
         opts.add_argument("--headless=new")
@@ -179,11 +178,8 @@ def new_driver(headless: bool, proxy: Optional[str]):
     if proxy:
         opts.add_argument(f"--proxy-server={proxy}")
         logging.info("Using proxy: %s", proxy)
-    major = get_installed_chrome_major() or 142
+    major = get_installed_chrome_major() or CHROME_VERSION_FALLBACK
     driver = uc.Chrome(options=opts, version_main=major)
-
-
-
     try:
         driver.set_page_load_timeout(PAGELOAD_TIMEOUT)
         driver.set_script_timeout(SCRIPT_TIMEOUT)
